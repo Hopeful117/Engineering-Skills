@@ -9,6 +9,32 @@ description: Execute the complete engineering workflow for a Story.
 
 Coordinate the complete engineering workflow.
 
+## Delegation
+
+The Engineering Story skill coordinates engineering work.
+
+It may delegate specialized tasks to other tools.
+
+Typical delegation includes:
+
+- Repository Analysis
+- Implementation Planning
+- Code Review
+
+Implementation may be delegated to OpenCode.
+
+When implementation is delegated:
+
+- OpenCode receives the approved Story and Implementation Plan.
+- OpenCode must remain within the approved scope.
+- OpenCode must not change architecture without approval.
+- OpenCode produces the implementation and its report.
+- Engineering Story resumes control after implementation.
+
+Delegation never transfers responsibility.
+
+Engineering Story remains responsible for the workflow.
+
 ## Workflow
 
 For a new Story:
