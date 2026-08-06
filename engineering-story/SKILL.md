@@ -1,199 +1,212 @@
+# Implementation Delegation
+
+Implementation may be delegated through the Delegate Task skill.
+
+Engineering Story remains responsible for the engineering workflow.
+
+Engineering Story never delegates:
+
+- workflow ownership;
+- engineering governance;
+- approval gates;
+- architecture decisions;
+- workflow sequencing.
+
+Delegate Task performs execution only.
+
 ---
-name: engineering-story
-description: Execute the complete engineering workflow for a Story.
+
+## Delegation Policy
+
+Engineering Story delegates implementation by invoking the Delegate Task skill.
+
+Engineering Story never communicates directly with execution providers.
+
+Provider selection, runtime validation, execution and result collection are delegated to Delegate Task.
+
+Delegate Task may use any compatible execution provider.
+
+Current provider:
+
+- OpenCode
+
+Future providers may include:
+
+- Codex
+- Claude Code
+- Gemini CLI
+- Developer OS Agents
+
+Engineering Story must remain completely provider-independent.
+
 ---
 
-# Engineering Story
+## Delegation Context
 
-## Mission
+Before invoking Delegate Task,
+Engineering Story prepares a complete engineering context.
 
-Coordinate the complete engineering workflow.
+The delegation context includes:
 
-## Delegation
+- approved Story;
+- approved Repository Analysis;
+- approved Implementation Plan (when required);
+- relevant ADRs;
+- repository conventions;
+- implementation constraints;
+- validation requirements;
+- expected deliverables;
+- expected Implementation Report location.
 
-The Engineering Story skill coordinates engineering work.
+The user must never manually prepare this context.
 
-It may delegate specialized tasks to other tools.
+---
 
-Typical delegation includes:
+## Delegation Request
 
-- Repository Analysis
-- Implementation Planning
-- Code Review
+Engineering Story creates a Delegation Request.
 
-Implementation may be delegated to OpenCode.
+Delegate Task is responsible for:
 
-When implementation is delegated:
+- selecting the provider;
+- validating execution prerequisites;
+- constructing the provider request;
+- executing the delegated task;
+- validating produced artifacts;
+- returning a structured Delegation Result.
 
-- OpenCode receives the approved Story and Implementation Plan.
-- OpenCode must remain within the approved scope.
-- OpenCode must not change architecture without approval.
-- OpenCode produces the implementation and its report.
-- Engineering Story resumes control after implementation.
+Engineering Story never performs provider-specific logic.
 
-Delegation never transfers responsibility.
+---
 
-Engineering Story remains responsible for the workflow.
+## Delegation Result
 
-## Workflow
+Engineering Story consumes the Delegation Result.
 
-For a new Story:
+If execution succeeds:
 
-1. Read the Story.
-2. Load the project workflow documentation.
-3. Execute Repository Analysis using `prompts/repository-analysis.md`.
-4. Wait for human approval.
-5. Execute Implementation Planning using `prompts/implementation-plan.md`.
-6. Wait for human approval.
-7. Execute Implementation using `prompts/implementation.md`.
-8. Wait for human approval.
-9. Execute Code Review using `prompts/code-review.md`.
-10. Wait for human approval.
-11. Execute Engineering Report using `prompts/engineering-report.md`.
-12. Finish.
+- resume the engineering workflow;
+- report generated artifacts;
+- report validation results;
+- wait for human review.
 
-Never skip approval gates.
+If execution fails:
 
-Never change the workflow order.
+- stop immediately;
+- preserve diagnostics;
+- report the failure;
+- request human guidance.
 
-Always use the dedicated prompt for each stage.
+---
 
-## Continue an Existing Story
+# Repository Validation
 
-When the user asks to continue an existing Story without naming a stage,
-execute the continuation protocol below.
+Before implementation begins,
+Engineering Story verifies:
 
-### Locate the Story
+- repository exists;
+- repository is a Git repository;
+- current branch is known;
+- Story directory exists;
+- working tree state is known.
 
-Resolve the Story before inspecting workflow state.
+Repository validation is completed before Delegate Task is invoked.
 
-- If the user provides a Story directory, use that directory.
-- If the user provides a `story.md` path, use its parent directory.
-- If the user provides a Story ID, match it against `stories/<id>-*`.
-- An ID must resolve to exactly one directory.
-- If no directory matches, stop and report that the Story was not found.
-- If multiple directories match, stop and request an exact path.
-- The resolved directory must contain a readable, non-empty `story.md` whose
-  first report heading is `# Story`.
+---
 
-Do not select a Story by timestamps, directory ordering, or a partial match when
-the result is ambiguous.
+# IDE Review
 
-### Inspect Artifact State
+The selected execution provider must modify the repository currently opened by the engineer.
 
-Use this artifact order as the authoritative workflow order:
+Implementation must never occur inside an unknown or hidden repository unless explicitly requested.
 
-```text
-story.md
-repository-analysis.md
-implementation-plan.md
-implementation-report.md
-code-review.md
-engineering-report.md
-```
+After successful execution,
+Engineering Story reports:
 
-The expected first report headings are:
+- modified files;
+- created files;
+- generated artifacts;
+- executed validations;
+- executed tests;
+- remaining issues.
 
-| Artifact | Expected heading |
-| --- | --- |
-| `story.md` | `# Story` |
-| `repository-analysis.md` | `# Repository Analysis` |
-| `implementation-plan.md` | `# Implementation Plan` |
-| `implementation-report.md` | `# Implementation Report` |
-| `code-review.md` | `# Code Review Report` |
-| `engineering-report.md` | `# Engineering Report` |
+Engineering Story then waits for human review.
 
-Before choosing a stage:
+---
 
-1. Inspect every expected artifact path in the resolved Story directory.
-2. Treat an artifact as a completed stage output only when it is a readable,
-   non-empty file with the expected first report heading.
-3. Require existing artifacts to form a contiguous prefix of the artifact
-   order.
-4. If an artifact exists after a missing, empty, unreadable, or unidentifiable
-   prerequisite, report an inconsistent workflow state and stop.
-5. Never overwrite, regenerate, or modify an existing completed artifact while
-   determining continuation state.
+# Quality Validation
 
-Artifact inspection determines completion only. It never determines approval.
+When SonarQube is configured for the affected module,
+implementation validation must include a SonarQube analysis.
 
-### Determine the Next Stage
+The execution provider must report:
 
-The first missing artifact selects the next valid stage:
+- analyzed project key;
+- analysis command;
+- Quality Gate status;
+- new bugs;
+- new vulnerabilities;
+- new security hotspots;
+- new code smells;
+- new-code coverage;
+- duplicated lines on new code.
 
-| Missing artifact | Next stage | Dedicated prompt |
-| --- | --- | --- |
-| `repository-analysis.md` | Repository Analysis | `prompts/repository-analysis.md` |
-| `implementation-plan.md` | Implementation Planning | `prompts/implementation-plan.md` |
-| `implementation-report.md` | Implementation | `prompts/implementation.md` |
-| `code-review.md` | Code Review | `prompts/code-review.md` |
-| `engineering-report.md` | Engineering Reporting | `prompts/engineering-report.md` |
+A failed Quality Gate must never be reported as a successful implementation.
 
-If no artifact is missing, report that the Story workflow is complete and do
-not execute a stage.
+SonarQube findings outside Story scope must not be corrected without explicit human approval.
 
-### Verify Approval
+Engineering Story never commits automatically.
 
-Before executing any stage after Repository Analysis, verify approval of the
-immediately preceding artifact.
+---
 
-Approval is valid only when the human explicitly approved the relevant artifact
-for the relevant Story in the current request or in unambiguous active
-conversation context.
+# Human Interaction
 
-Never infer approval from:
+OpenClaw remains the interactive interface.
 
-- artifact existence;
-- filenames or directory names;
-- timestamps;
-- Story status alone;
-- a stage recommendation;
-- prior workflow progress.
+If the execution provider reports:
 
-Preserve these approval boundaries:
+- missing information;
+- architectural conflict;
+- contradictory requirements;
+- dependency problems;
+- unsafe Git state;
+- validation failures;
 
-- Repository Analysis must be approved before Implementation Planning.
-- Implementation Plan must be approved before Implementation.
-- Implementation Report must be approved before Code Review.
-- Code Review Report must be approved before Engineering Reporting.
+Engineering Story stops immediately and requests human guidance.
 
-A Code Review recommendation is not human approval. If the review reports
-`Changes required` or `Blocked`, a generic continuation request must stop and
-request explicit human resolution. Do not infer that findings were accepted or
-corrected.
+After implementation,
+Engineering Story summarizes the work and waits for review.
 
-If approval is missing, ambiguous, or applies to another Story or artifact,
-report the current state, request the required approval, and stop without
-executing a stage.
+---
 
-### Execute One Stage
+# User Interaction
 
-After Story resolution, artifact validation, prerequisite validation, and any
-required approval confirmation:
+Normal interaction remains intentionally minimal.
 
-1. Load the project documentation required by the detected stage.
-2. Load only the dedicated prompt for that stage.
-3. Execute that stage according to its prompt.
-4. Save its artifact under the expected filename in the resolved Story
-   directory.
-5. Verify that the artifact was produced at that path.
-6. Stop at the next human approval gate.
+Supported examples:
 
-Execute exactly one stage per continuation request. Do not continue into a
-second stage even if later approval appears to be available.
+Use engineering-story for Story <id>
 
-Do not perform automatic approval, commits, merges, pull requests, rollback,
-parallel stages, runtime integrations, or persistent workflow-state updates.
+Continue Story <id>
 
-### Report Workflow State
+Approve and continue Story <id>
 
-Before stopping, report:
+Reject Story <id>
 
-- the resolved Story ID and directory;
-- the artifacts detected;
-- the latest completed stage;
-- the next valid stage, or that the workflow is complete;
-- whether required approval was confirmed, missing, or ambiguous;
-- the stage executed, if any;
-- the artifact produced, if any;
-- the next required approval or continuation action.
+Delegate this implementation.
+
+Delegate this documentation audit.
+
+Engineering Story automatically invokes Delegate Task when delegation is requested.
+
+The user must never specify:
+
+- workflow stage;
+- artifact paths;
+- repository documents;
+- provider-specific commands;
+- provider authentication;
+- workflow sequencing;
+- provider implementation details.
+
+Engineering Story owns workflow orchestration from beginning to end.

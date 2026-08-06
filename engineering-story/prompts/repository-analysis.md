@@ -204,6 +204,22 @@ Repository Analysis completed.
 Awaiting human approval before Implementation Planning.
 
 ---
+## Implementation Readiness
+
+Determine whether the Story can be implemented
+using the current repository.
+
+Identify:
+
+- missing contracts;
+- missing ownership;
+- missing data;
+- missing architecture;
+- blocking ADR conflicts.
+
+If the Story cannot be implemented safely,
+recommend blocking implementation before
+Implementation Planning.
 
 # Constraints
 
@@ -217,6 +233,7 @@ Never:
 - ignore project documentation.
 
 ---
+
 
 # Stop Condition
 

@@ -1,5 +1,18 @@
 # OpenCode Delegation Contract
 
+## Prerequisites
+
+Before OpenClaw can delegate work to OpenCode, the execution environment must provide:
+
+- OPENCODE_SERVER_USERNAME
+- OPENCODE_SERVER_PASSWORD
+
+OpenClaw must inherit these variables from its execution environment.
+
+The skill must never hardcode credentials.
+
+If the variables are missing, delegation must stop before invoking OpenCode.
+
 ## Purpose
 
 This document defines how the `engineering-story` skill delegates implementation work to OpenCode.
