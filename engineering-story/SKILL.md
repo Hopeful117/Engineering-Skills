@@ -1,18 +1,29 @@
-# Implementation Delegation
+---
 
-Implementation may be delegated through the Delegate Task skill.
+name: engineering-story
+description: Orchestrate Engineering Stories through repository analysis, implementation planning, implementation delegation, code review, engineering reporting, and explicit human approval gates.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Engineering Story remains responsible for the engineering workflow.
+# Engineering Story
 
-Engineering Story never delegates:
+## Mission
 
-* workflow ownership;
+Engineering Story is the orchestrator of the engineering workflow.
+
+It coordinates the complete lifecycle of an Engineering Story while preserving:
+
 * engineering governance;
-* approval gates;
-* architecture decisions;
-* workflow sequencing.
+* explicit human approval;
+* architecture constraints;
+* workflow sequencing;
+* provider independence;
+* traceability of engineering artifacts.
 
-Delegate Task performs execution only.
+Engineering Story owns workflow orchestration.
+
+Execution may be delegated.
+
+Governance may not.
 
 ---
 
@@ -26,8 +37,9 @@ It is responsible for:
 * determining which artifact may be produced next;
 * enforcing Human Approval Gates;
 * validating workflow preconditions;
+* invoking specialized workflow roles;
 * invoking Delegate Task only when delegation is allowed;
-* preventing execution of later workflow stages before their prerequisites are satisfied;
+* preventing later workflow stages from running before their prerequisites are satisfied;
 * returning control to the human when a STOP condition or Human Approval Gate is reached.
 
 No execution provider, delegated agent, generated artifact, report, model output, or workflow role may advance the workflow independently.
@@ -36,11 +48,87 @@ Workflow sequencing is controlled exclusively by Engineering Story.
 
 ---
 
+# Workflow Roles
+
+The Engineering Story workflow uses specialized roles.
+
+## Repository Analysis
+
+Responsible for understanding:
+
+* the Story;
+* repository structure;
+* existing implementation;
+* architecture;
+* relevant ADRs;
+* affected modules;
+* constraints;
+* risks;
+* missing information.
+
+Produces:
+
+`Repository Analysis`
+
+---
+
+## Implementation Planning
+
+Responsible for transforming a human-approved Repository Analysis into an actionable implementation strategy.
+
+Produces:
+
+`Implementation Plan`
+
+---
+
+## Implementation
+
+Responsible for executing the human-approved Implementation Plan.
+
+Implementation may be delegated through Delegate Task.
+
+Produces:
+
+`Implementation Report`
+
+---
+
+## Code Review
+
+Responsible for independently verifying:
+
+* Story compliance;
+* plan compliance;
+* implementation correctness;
+* architecture compliance;
+* test coverage;
+* validation evidence;
+* residual risks.
+
+Produces:
+
+`Code Review Report`
+
+---
+
+## Engineering Reporting
+
+Responsible for producing the final engineering record after all required Human Approval Gates have been satisfied.
+
+Produces:
+
+`Engineering Report`
+
+---
+
 # Human Approval Protocol
 
 Human approval is an explicit action performed by the human user.
 
-Approval is a workflow event, not a conclusion that may be inferred from repository state, artifact contents, validation results, model output, or previous workflow activity.
+Approval is a workflow event.
+
+It is not a conclusion that may be inferred from repository state, artifact contents, validation results, model output, or previous workflow activity.
 
 Only the human user may satisfy a Human Approval Gate.
 
@@ -70,7 +158,7 @@ It may never establish workflow approval state.
 
 ---
 
-## Current Gate Only
+# Current Gate Only
 
 Human approval applies only to the Human Approval Gate currently waiting for approval.
 
@@ -83,7 +171,7 @@ means:
 1. approve the artifact associated with the current pending Human Approval Gate;
 2. advance the workflow through that gate;
 3. execute the next permitted workflow stage;
-4. stop again when the next Human Approval Gate or other STOP condition is reached.
+4. stop again when the next Human Approval Gate or STOP condition is reached.
 
 It does not approve future gates.
 
@@ -91,19 +179,21 @@ Approval must never cascade across multiple Human Approval Gates.
 
 ---
 
-## Continue Is Not Approval
+# Continue Is Not Approval
 
 `Continue Story <id>` does not grant human approval.
 
 If no Human Approval Gate is pending, Engineering Story may resume the workflow from its current state.
 
-If a Human Approval Gate is pending, Engineering Story must not advance and must inform the user which approval is required.
+If a Human Approval Gate is pending, Engineering Story must not advance.
+
+It must inform the user which approval is required.
 
 Only an explicit approval action may satisfy the gate.
 
 ---
 
-## Approval Validity
+# Approval Validity
 
 Approval applies to the specific artifact version presented to the human.
 
@@ -117,7 +207,7 @@ When uncertain whether a change is material, Engineering Story must require rene
 
 ---
 
-# Engineering Story Human Approval Gates
+# Human Approval Gates
 
 The Engineering Story workflow contains three mandatory Human Approval Gates.
 
@@ -125,15 +215,17 @@ The Engineering Story workflow contains three mandatory Human Approval Gates.
 
 Workflow:
 
+```text
 Engineering Story
 → Repository Analysis
-→ `WAITING_FOR_ANALYSIS_APPROVAL`
+→ WAITING_FOR_ANALYSIS_APPROVAL
+```
 
 The Repository Analysis must be presented to the human.
 
 Engineering Story must then STOP.
 
-Implementation Planning must not begin until the human explicitly approves the Repository Analysis.
+Implementation Planning must not begin until the human explicitly approves the current Repository Analysis.
 
 Approval allows the workflow to enter Implementation Planning.
 
@@ -143,15 +235,17 @@ Approval allows the workflow to enter Implementation Planning.
 
 Workflow:
 
+```text
 Approved Repository Analysis
 → Implementation Plan
-→ `WAITING_FOR_PLAN_APPROVAL`
+→ WAITING_FOR_PLAN_APPROVAL
+```
 
 The Implementation Plan must be presented to the human.
 
 Engineering Story must then STOP.
 
-Implementation must not begin until the human explicitly approves the Implementation Plan.
+Implementation must not begin until the human explicitly approves the current Implementation Plan.
 
 Delegate Task must not be invoked for implementation while this gate is pending.
 
@@ -163,10 +257,12 @@ Approval allows the workflow to enter Implementation.
 
 Workflow:
 
+```text
 Approved Implementation Plan
 → Implementation
 → Code Review
-→ `WAITING_FOR_REVIEW_APPROVAL`
+→ WAITING_FOR_REVIEW_APPROVAL
+```
 
 Implementation may proceed directly to Code Review without an additional Human Approval Gate.
 
@@ -174,7 +270,7 @@ The Code Review Report must then be presented to the human.
 
 Engineering Story must STOP.
 
-The final Engineering Report, finalization, commit, merge, or equivalent completion action must not occur until the human explicitly approves the Code Review.
+The Engineering Report, finalization, commit, merge, or equivalent completion action must not occur until the human explicitly approves the current Code Review.
 
 Approval allows the workflow to enter finalization.
 
@@ -304,7 +400,7 @@ Do not invoke the Implementation Planner.
 Requires:
 
 * current Story;
-* approved Repository Analysis;
+* human-approved Repository Analysis;
 * completed Implementation Plan;
 * explicit human approval of the current Implementation Plan.
 
@@ -323,8 +419,8 @@ Do not modify implementation files.
 Requires:
 
 * current Story;
-* approved Repository Analysis;
-* approved Implementation Plan;
+* human-approved Repository Analysis;
+* human-approved Implementation Plan;
 * completed Implementation Report;
 * implementation diff.
 
@@ -341,8 +437,8 @@ The Code Reviewer may never grant human approval.
 Requires:
 
 * current Story;
-* approved Repository Analysis;
-* approved Implementation Plan;
+* human-approved Repository Analysis;
+* human-approved Implementation Plan;
 * completed Implementation Report;
 * completed Code Review Report;
 * explicit human approval of the current Code Review.
@@ -355,13 +451,29 @@ Do not produce the Engineering Report.
 
 ---
 
-# Delegation Policy
+# Implementation Delegation
 
-Engineering Story delegates implementation by invoking the Delegate Task skill.
+Implementation may be delegated through the Delegate Task skill.
+
+Engineering Story remains responsible for the engineering workflow.
+
+Engineering Story never delegates:
+
+* workflow ownership;
+* engineering governance;
+* approval gates;
+* architecture decisions;
+* workflow sequencing.
+
+Delegate Task performs execution only.
 
 Engineering Story never communicates directly with execution providers.
 
-Provider selection, runtime validation, execution and result collection are delegated to Delegate Task.
+Provider selection, runtime validation, execution, and result collection are delegated to Delegate Task.
+
+---
+
+# Delegation Policy
 
 Delegate Task may use any compatible execution provider.
 
@@ -371,16 +483,16 @@ Current provider:
 
 Future providers may include:
 
-* Codex
-* Claude Code
-* Gemini CLI
-* Developer OS Agents
+* Codex;
+* Claude Code;
+* Gemini CLI;
+* Developer OS Agents.
 
 Engineering Story must remain completely provider-independent.
 
 Provider behavior must never determine workflow governance.
 
-A provider that ignores workflow instructions must still not be considered authorized to bypass a Human Approval Gate.
+A provider that ignores workflow instructions is not authorized to bypass a Human Approval Gate.
 
 ---
 
@@ -414,7 +526,7 @@ The delegation context includes:
 
 * Story;
 * human-approved Repository Analysis;
-* human-approved Implementation Plan when required;
+* human-approved Implementation Plan;
 * relevant ADRs;
 * repository conventions;
 * implementation constraints;
@@ -623,23 +735,23 @@ Engineering Story owns workflow orchestration from beginning to end.
 
 The following invariants always apply.
 
-1. **Only the human user can satisfy a Human Approval Gate.**
+1. Only the human user can satisfy a Human Approval Gate.
 
-2. **Approval is never inferred.**
+2. Approval is never inferred.
 
-3. **Approval applies only to the current gate and current artifact version.**
+3. Approval applies only to the current gate and current artifact version.
 
-4. **Completing a stage never approves the next stage.**
+4. Completing a stage never approves the next stage.
 
-5. **A model, agent, workflow role, execution provider, artifact, test result, build result, or Quality Gate cannot grant human approval.**
+5. A model, agent, workflow role, execution provider, artifact, test result, build result, or Quality Gate cannot grant human approval.
 
-6. **Engineering Story must STOP whenever a required Human Approval Gate has not been satisfied.**
+6. Engineering Story must STOP whenever a required Human Approval Gate has not been satisfied.
 
-7. **Implementation delegation is forbidden until the current Implementation Plan has explicit human approval.**
+7. Implementation delegation is forbidden until the current Implementation Plan has explicit human approval.
 
-8. **Finalization is forbidden until the current Code Review has explicit human approval.**
+8. Finalization is forbidden until the current Code Review has explicit human approval.
 
-9. **No approval cascades to future gates.**
+9. No approval cascades to future gates.
 
-10. **Workflow governance remains provider-independent.**
+10. Workflow governance remains provider-independent.
 

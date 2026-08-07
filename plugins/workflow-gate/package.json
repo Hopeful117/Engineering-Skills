@@ -1,0 +1,35 @@
+{
+  "name": "@hopecodesec/openclaw-workflow-gate",
+  "version": "0.1.0",
+  "description": "Workflow gate plugin for Engineering Story — deterministic state controller with human approval enforcement",
+  "type": "module",
+  "main": "./dist/index.js",
+  "files": [
+    "dist",
+    "openclaw.plugin.json",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "plugin:build": "npm run build && openclaw plugins build --entry ./dist/index.js",
+    "plugin:validate": "npm run plugin:build && openclaw plugins validate --entry ./dist/index.js"
+  },
+  "dependencies": {
+    "typebox": "^1.1.39"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.5.17"
+  },
+  "openclaw": {
+    "extensions": [
+      "./dist/index.js"
+    ]
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.22.3"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}
