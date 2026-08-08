@@ -1,6 +1,6 @@
 ---
 name: "engineering-story"
-description: "Orchestrate Engineering Stories with optional DevLog-first context and explicit human approval gates."
+description: "Orchestrate Engineering Stories with symlink-safe optional DevLog context."
 ---
 
 # Engineering Story

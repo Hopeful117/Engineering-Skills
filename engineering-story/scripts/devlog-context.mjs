@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { pathToFileURL } from "node:url";
+import { realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const DEFAULT_TIMEOUT_MS = 3000;
@@ -127,6 +128,18 @@ export async function main(argv = process.argv.slice(2)) {
   }
 }
 
-if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
+export function isMainModule(
+  executablePath = process.argv[1],
+  moduleUrl = import.meta.url,
+) {
+  if (!executablePath) return false;
+  try {
+    return realpathSync(executablePath) === fileURLToPath(moduleUrl);
+  } catch {
+    return false;
+  }
+}
+
+if (isMainModule()) {
   process.exitCode = await main();
 }

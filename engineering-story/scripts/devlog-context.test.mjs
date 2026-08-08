@@ -1,9 +1,14 @@
 import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
 import http from "node:http";
+import { mkdtemp, rm, symlink } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 import {
   DevLogContextError,
   formatFailure,
+  isMainModule,
   requestDevLogContext,
 } from "./devlog-context.mjs";
 
@@ -200,4 +205,35 @@ test("wraps fetch failures and formats visible fallback message", async () => {
     message,
     "DEVLOG_CONTEXT_ERROR: DevLog unavailable. Repository Analysis continues without DevLog.",
   );
+});
+
+
+test("recognizes the CLI entrypoint through a directory symlink", async () => {
+  const temporaryDirectory = await mkdtemp(
+    path.join(tmpdir(), "engineering-story-symlink-"),
+  );
+  const canonicalScript = path.resolve(
+    path.dirname(new URL(import.meta.url).pathname),
+    "devlog-context.mjs",
+  );
+  const linkedSkillDirectory = path.join(temporaryDirectory, "engineering-story");
+  await symlink(
+    path.resolve(path.dirname(canonicalScript), ".."),
+    linkedSkillDirectory,
+    "dir",
+  );
+
+  try {
+    const linkedScript = path.join(
+      linkedSkillDirectory,
+      "scripts",
+      "devlog-context.mjs",
+    );
+    assert.equal(
+      isMainModule(linkedScript, pathToFileURL(canonicalScript).href),
+      true,
+    );
+  } finally {
+    await rm(temporaryDirectory, { recursive: true, force: true });
+  }
 });
