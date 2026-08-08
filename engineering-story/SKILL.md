@@ -1,6 +1,6 @@
 ---
 name: "engineering-story"
-description: "Orchestrate Engineering Stories with symlink-safe optional DevLog context."
+description: "Orchestrate Engineering Stories with approval gates, DevLog context, and documentation reconciliation."
 ---
 
 # Engineering Story
@@ -93,6 +93,26 @@ Produces:
 
 ---
 
+## Documentation Reconciliation
+
+Responsible for determining whether the implemented Story changes repository behavior, contracts,
+configuration, setup, architecture, operations, or user-facing capabilities documented by the
+repository.
+
+When documentation is affected, update only the relevant canonical repository documentation and
+include those changes in the implementation diff. When no update is necessary, record that
+conclusion and its basis in the Implementation Report.
+
+Documentation reconciliation is part of implementation completion. It occurs before Code Review so
+that documentation changes are reviewed with the implementation.
+
+Produces:
+
+* updated repository documentation when necessary;
+* an explicit documentation outcome in the Implementation Report.
+
+---
+
 ## Code Review
 
 Responsible for independently verifying:
@@ -101,6 +121,7 @@ Responsible for independently verifying:
 * plan compliance;
 * implementation correctness;
 * architecture compliance;
+* documentation accuracy and completeness for the implemented change;
 * test coverage;
 * validation evidence;
 * residual risks.
@@ -296,6 +317,8 @@ WAITING_FOR_PLAN_APPROVAL
   ↓ explicit human approval
 Implementation
   ↓
+Documentation Reconciliation
+  ↓
 Code Review
   ↓
 STOP
@@ -429,6 +452,39 @@ Do not modify implementation files.
 
 ---
 
+## Documentation Reconciliation
+
+Requires:
+
+* completed implementation;
+* the current Story;
+* the human-approved Repository Analysis;
+* the human-approved Implementation Plan;
+* access to the repository's canonical documentation.
+
+Before Code Review:
+
+1. Determine whether the implementation changes documented behavior, API contracts, configuration,
+   installation or runtime instructions, architecture, operational procedures, or user-visible
+   capabilities.
+2. Inspect only the canonical documentation relevant to those changes.
+3. Update that documentation when necessary, preserving repository conventions and Story scope.
+4. Do not create speculative documentation, broad rewrites, changelogs, release notes, or unrelated
+   cleanup unless the Story explicitly requires them.
+5. Record in the Implementation Report which documentation was updated and why, or state
+   `Documentation update: Not required` with a concise evidence-based reason.
+6. Include documentation changes in the implementation diff and validation appropriate to their
+   format.
+
+If a required documentation update cannot be completed safely:
+
+STOP.
+
+Report the missing information or conflict and request human guidance.
+
+Documentation reconciliation does not add a Human Approval Gate and does not authorize scope
+expansion.
+
 ## Code Review
 
 Requires:
@@ -436,7 +492,8 @@ Requires:
 * current Story;
 * human-approved Repository Analysis;
 * human-approved Implementation Plan;
-* completed Implementation Report;
+* completed Implementation Report containing an explicit documentation outcome;
+* completed Documentation Reconciliation;
 * implementation diff.
 
 Code Review may follow successful implementation without an additional Human Approval Gate.
@@ -637,7 +694,9 @@ After successful execution, Engineering Story reports:
 * executed tests;
 * remaining issues.
 
-The workflow may then proceed to Code Review.
+The workflow must then perform Documentation Reconciliation. It may proceed to Code Review only
+after the Implementation Report records the documentation outcome and any required documentation
+changes are included in the reviewed diff.
 
 After Code Review, Engineering Story waits for human approval before finalization.
 
@@ -766,7 +825,10 @@ The following invariants always apply.
 
 8. Finalization is forbidden until the current Code Review has explicit human approval.
 
-9. No approval cascades to future gates.
+9. Documentation impact must be reconciled before Code Review; required documentation changes must
+be reviewed with the implementation.
 
-10. Workflow governance remains provider-independent.
+10. No approval cascades to future gates.
+
+11. Workflow governance remains provider-independent.
 
