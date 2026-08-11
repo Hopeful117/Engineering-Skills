@@ -401,6 +401,20 @@ Does not require a previous Human Approval Gate.
 
 ---
 
+## DevLog Lifecycle Registration
+
+After Story creation and before Repository Analysis:
+
+1. Resolve the canonical Git repository root.
+2. Read the workspace-local DevLog configuration from `TOOLS.md`.
+3. When an exact repository mapping exists, read `references/devlog-story.md` and invoke `node scripts/devlog-story.mjs --base-url <url> --project-id <uuid> --operation register` with `{ storyNumber, title, storyPath }` on stdin. The response includes `storyId` for subsequent operations.
+4. On success, record the returned DevLog story ID for subsequent lifecycle operations.
+5. On failure, display a visible `DEVLOG_LIFECYCLE_ERROR` message and continue.
+
+Registration is a best-effort side effect. Missing configuration, timeout, connection failure, non-success response, or malformed data must never block Repository Analysis and must never become a workflow-gate event.
+
+---
+
 ## DevLog Context Preparation
 
 Before invoking Repository Analysis:
@@ -449,6 +463,19 @@ STOP.
 Do not invoke Delegate Task.
 
 Do not modify implementation files.
+
+---
+
+## DevLog Lifecycle Start
+
+After Human Approval Gate 2 (Implementation Plan approved) and before Implementation begins:
+
+1. Capture `git rev-parse HEAD` as `baseCommit`.
+2. Invoke `node scripts/devlog-story.mjs --base-url <url> --project-id <uuid> --story-id <uuid> --operation start` with `{ baseCommit }` on stdin.
+3. On success, record the `baseCommit` for the subsequent complete operation.
+4. On failure, display a visible `DEVLOG_LIFECYCLE_ERROR` message and continue.
+
+Start is a best-effort side effect. Failure must never block Implementation and must never become a workflow-gate event.
 
 ---
 
@@ -520,6 +547,22 @@ If Code Review approval is missing:
 STOP.
 
 Do not produce the Engineering Report.
+
+---
+
+## Human Commit Boundary and DevLog Lifecycle Complete
+
+After Code Review approval (Gate 3) and before producing the Engineering Report:
+
+1. Tell the human: "Please create the Git commit for this Story. Resume after the commit exists."
+2. Wait for user input. This is a workflow pause point, NOT an Approval Gate. The three existing Approval Gates and their semantics are preserved.
+3. After the human confirms the commit exists, capture `git rev-parse HEAD` as `targetCommit`.
+4. Verify `targetCommit != baseCommit`. If they are equal, tell the human the commit was not detected and stop — the workflow resumes when the commit exists.
+5. Invoke `node scripts/devlog-story.mjs --base-url <url> --project-id <uuid> --story-id <uuid> --operation complete` with `{ targetCommit, baseCommit }` on stdin.
+6. On failure, display a visible `DEVLOG_LIFECYCLE_ERROR` message and continue.
+7. Produce the Engineering Report and mark the workflow as Completed.
+
+The human commit boundary is distinct from an Approval Gate. It is a mechanical pause for a Git operation. DevLog complete is a best-effort side effect. Failure must never block finalization.
 
 ---
 
