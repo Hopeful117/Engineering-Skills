@@ -611,11 +611,29 @@ Describe:
 * test quality;
 * validation results.
 
+Assess whether the quality validation was appropriate for the actual repository
+and affected stack.
+
+Distinguish explicitly between:
+
+* missing required checks;
+* failed checks;
+* blocked or unavailable checks;
+* justified non-applicable checks.
+
+When the Story changes ranking, allocation, prioritization, or another
+selection-sensitive behavior, evaluate whether representative outcome
+validation was provided and whether it is sufficient.
+
 ---
 
 ## Validation Performed
 
 List every executed command with its result.
+
+If a structured quality-validation result was provided, review it as evidence
+and state whether it sufficiently covers the applicable repository-defined
+quality gates.
 
 Example:
 
@@ -835,4 +853,3 @@ Do not invoke another workflow stage.
 Wait for explicit human approval.
 
 The Engineering Report and finalization may begin only after the Engineering Story orchestrator confirms that the current Code Review has received explicit human approval.
-

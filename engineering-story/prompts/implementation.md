@@ -352,6 +352,21 @@ Before considering implementation complete, verify as appropriate:
 * frontend tests when affected;
 * no obvious regression in the changed behavior.
 
+Quality validation must reflect the actual repository and affected stack.
+
+When the `quality-validation` skill is available, use its result as the
+preferred source for determining and reporting:
+
+* applicable checks;
+* executed checks;
+* passed checks;
+* failed checks;
+* blocked, unavailable, or non-applicable checks with reasons.
+
+When the Story changes ranking, allocation, prioritization, or another
+behavior where coverage can give false confidence, include representative
+outcome validation.
+
 Prefer targeted validation first.
 
 Use repository-wide validation when required by the Story or workflow.
@@ -460,6 +475,16 @@ Do not claim coverage that was not verified.
 ## Validation
 
 List every important validation command actually executed and its result.
+
+The Validation section must also make clear:
+
+* which quality checks were applicable to the affected modules;
+* which checks were not applicable;
+* which checks were blocked or unavailable;
+* what evidence supports material quality conclusions.
+
+If the `quality-validation` skill was used, summarize or reference its result
+rather than pasting raw tool output without interpretation.
 
 Example:
 
@@ -618,4 +643,3 @@ Do not push.
 Do not merge.
 
 The Engineering Story orchestrator may invoke the separate Code Review stage when its preconditions are satisfied.
-

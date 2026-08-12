@@ -747,9 +747,41 @@ After Code Review, Engineering Story waits for human approval before finalizatio
 
 # Quality Validation
 
-When SonarQube is configured for the affected module, implementation validation must include a SonarQube analysis.
+Quality validation must be determined from the actual repository, affected modules, and active technical stack.
+
+When the `quality-validation` skill is available, Engineering Story should use it as the preferred mechanism for:
+
+* determining which quality checks are applicable;
+* executing or coordinating those checks;
+* producing a structured quality-validation result;
+* distinguishing applicable, non-applicable, executed, failed, blocked, and unavailable checks.
+
+When the `quality-validation` skill is unavailable, the execution provider must still report the same quality-validation outcome structure directly in the Implementation Report.
+
+Quality validation must remain separate from workflow authority.
+
+It may recommend readiness.
+
+It may never grant approval.
+
+When SonarQube is configured for an affected module, the quality-validation result must include a SonarQube analysis.
+
+When repository-defined frontend quality gates apply to the affected modules, the quality-validation result must include the applicable frontend checks such as lint, format verification, strict build or type checking, tests, and coverage gates used by that repository.
+
+When the Story changes ranking, allocation, prioritization, or another behavior where mechanical correctness and coverage can produce false confidence, the quality-validation result must include representative outcome validation.
 
 The execution provider must report:
+
+* affected modules or surfaces;
+* applicable checks;
+* executed checks;
+* passed checks;
+* failed checks;
+* blocked or unavailable checks with reasons;
+* non-applicable checks with reasons;
+* supporting evidence for material quality conclusions.
+
+When SonarQube applies, the execution provider must also report:
 
 * analyzed project key;
 * analysis command;
@@ -764,6 +796,8 @@ The execution provider must report:
 A failed Quality Gate must never be reported as a successful implementation.
 
 SonarQube findings outside Story scope must not be corrected without explicit human approval.
+
+Missing required quality validation must never be represented as successful validation.
 
 A successful Quality Gate does not constitute human approval.
 
@@ -874,4 +908,3 @@ be reviewed with the implementation.
 10. No approval cascades to future gates.
 
 11. Workflow governance remains provider-independent.
-

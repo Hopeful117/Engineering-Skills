@@ -387,6 +387,19 @@ Summarize:
 * relevant validation commands;
 * known validation limitations.
 
+Summarize the quality-validation strategy actually applied to the affected
+repository surfaces.
+
+State clearly when checks were:
+
+* applicable and passed;
+* applicable and failed;
+* blocked or unavailable;
+* not applicable.
+
+When representative outcome validation was required by the Story, summarize
+that evidence separately from generic regression and coverage validation.
+
 Never claim a command passed unless previous engineering artifacts provide evidence that it passed.
 
 Distinguish pre-existing unrelated failures from Story-related failures.
@@ -643,4 +656,3 @@ Do not merge.
 Do not begin another Story automatically.
 
 The Engineering Story workflow is complete only when the orchestrator confirms that all required stages and Human Approval Gates have been satisfied.
-
