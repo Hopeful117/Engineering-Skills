@@ -56,11 +56,22 @@ The analysis receives:
 * the current Story;
 * the current Git repository;
 * the project documentation;
-* the engineering workflow documentation.
+* the engineering workflow documentation;
+* selectively consulted curated vault notes when relevant.
 
 The Story does not need to be approved by this role.
 
 The Repository Analyst must treat the provided Story as the authoritative scope for this analysis.
+
+Curated vault notes are optional transverse supporting context only.
+
+Source-of-truth precedence is:
+
+* current Story;
+* current repository evidence;
+* accepted repository ADRs and canonical repository documentation;
+* usable DevLog project context when available;
+* curated vault notes as transverse supporting context.
 
 If required input is missing, incomplete, contradictory, or unsafe to interpret, report it explicitly.
 
@@ -215,6 +226,23 @@ Examples may include:
 Do not perform a general repository audit.
 
 Do not report unrelated technical debt unless the Story depends on it.
+
+---
+
+## Vault Context Usage
+
+When the Story touches cross-project concepts, workflow patterns, quality standards, AI-governance rules, or knowledge-engineering principles, the Repository Analyst may consult the local curated vault selectively.
+
+If vault context is consulted:
+
+* use only notes materially relevant to the current Story;
+* treat the notes as curated transverse guidance, not project-state truth;
+* reconcile every vault-derived claim against repository evidence before relying on it;
+* record whether the vault was consulted and which notes materially informed the analysis.
+
+If vault context is not consulted:
+
+state that it was not needed.
 
 ---
 
@@ -550,4 +578,3 @@ Do not continue to another workflow stage.
 Wait for explicit human approval.
 
 The next stage may begin only after the Engineering Story orchestrator confirms that the current Repository Analysis has received explicit human approval.
-

@@ -200,7 +200,8 @@ Summarize:
 * affected modules;
 * existing implementation;
 * important architectural constraints;
-* relevant risks identified before planning.
+* relevant risks identified before planning;
+* whether curated vault context materially informed the analysis.
 
 Do not reproduce the complete Repository Analysis.
 
@@ -231,7 +232,8 @@ Summarize:
 * new components;
 * tests created or updated;
 * implementation deviations;
-* validation performed.
+* validation performed;
+* the final vault outcome recorded in the Implementation Report.
 
 Do not claim implementation work that does not appear in the Implementation Report or repository evidence.
 
@@ -247,7 +249,8 @@ Summarize:
 * test assessment;
 * technical recommendation;
 * residual risks;
-* human approval outcome.
+* human approval outcome;
+* whether the reviewed vault outcome remained appropriate and proposal-only.
 
 Distinguish clearly between:
 
@@ -403,6 +406,16 @@ that evidence separately from generic regression and coverage validation.
 Never claim a command passed unless previous engineering artifacts provide evidence that it passed.
 
 Distinguish pre-existing unrelated failures from Story-related failures.
+
+---
+
+## Vault Outcome
+
+Summarize:
+
+* whether curated vault context materially informed the Story;
+* whether the final outcome was no vault action, a new candidate suggestion, an enrich-existing suggestion, or a deferred vault action;
+* whether that outcome remained proposal-only.
 
 ---
 

@@ -100,6 +100,8 @@ The implementation receives:
 * implementation constraints;
 * validation requirements.
 
+Vault-derived context, when present in the Repository Analysis, remains supporting guidance only and must not override Story scope, repository evidence, ADRs, or approved planning decisions.
+
 The Implementation Plan is the primary execution contract.
 
 Every significant modification must be traceable to the approved plan.
@@ -374,6 +376,31 @@ Use repository-wide validation when required by the Story or workflow.
 Never claim a validation command passed unless it was actually executed successfully.
 
 If validation cannot be executed, state that explicitly.
+
+---
+
+# Documentation Reconciliation
+
+Before implementation is considered complete:
+
+* update Story-adjacent documentation required by the approved plan;
+* keep repository documentation aligned with implemented behavior when the Story scope requires it;
+* avoid silent curation of transverse knowledge artifacts outside the approved workflow outputs.
+
+The Implementation Report must include a `Vault Outcome` section stating:
+
+* whether the vault was consulted during Repository Analysis;
+* whether the completed Story suggests:
+  * no vault action;
+  * a new candidate note;
+  * an enrich-existing candidate;
+  * a deferred vault action;
+* the rationale and provenance for that outcome;
+* the target curated note when enrichment is suggested.
+
+All vault write-side outcomes remain proposal-only at this stage.
+
+Implementation must not silently create, edit, or overwrite curated vault notes unless the approved Story explicitly authorizes that repository mutation.
 
 ---
 

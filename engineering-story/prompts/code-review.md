@@ -209,7 +209,8 @@ Verify:
 * planned files and components were implemented appropriately;
 * deviations are documented;
 * undocumented deviations are identified;
-* the implementation did not expand the approved scope.
+* the implementation did not expand the approved scope;
+* the Implementation Report's `Vault Outcome` is appropriate, evidence-based, and consistent with workflow authority boundaries.
 
 A deviation is not automatically a defect.
 
@@ -346,6 +347,17 @@ Verify:
 * complexity is proportional to the requirement.
 
 Style-only observations must not be classified as blocking unless they violate an explicit repository rule.
+
+---
+
+## Vault Outcome Review
+
+When the Implementation Report includes a `Vault Outcome` section, verify:
+
+* the reported vault consultation status matches the Repository Analysis;
+* any suggested new note or enrich-existing candidate is supported by completed Story evidence;
+* the recommendation does not treat the vault as authoritative project-state truth;
+* the outcome remains proposal-only unless the approved Story explicitly included vault mutation work.
 
 ---
 

@@ -431,6 +431,29 @@ DevLog is optional. Missing configuration, timeout, connection failure, non-succ
 
 DevLog provides context. Kiko produces analysis. The repository remains the source of truth.
 
+---
+
+## Vault Context Preparation
+
+Before invoking Repository Analysis:
+
+1. Determine whether the current Story appears likely to benefit from curated transverse knowledge already captured in the local Obsidian vault.
+2. Consult the vault selectively when the Story touches cross-project concepts, workflow patterns, quality standards, AI-governance rules, or knowledge-engineering principles already likely represented there.
+3. Use the existing repository-owned vault references and deterministic read-side tooling when vault consultation is performed.
+4. Treat vault notes as curated transverse guidance, not as authoritative project-state truth.
+5. Record in the Repository Analysis whether the vault was consulted and, when it was, which notes materially informed the analysis.
+6. Do not load the vault indiscriminately or treat the complete vault as mandatory default context.
+
+Source-of-truth precedence for Repository Analysis is:
+
+* current Story;
+* current repository evidence;
+* accepted repository ADRs and canonical repository documentation;
+* usable DevLog project context when available;
+* curated vault notes as transverse supporting context.
+
+Vault consultation is optional and selective. Missing vault access, missing notes, weak relevance, or an unchanged local vault state must never block Repository Analysis and must never become a workflow-gate event.
+
 ## Implementation Planning
 
 Requires:
@@ -502,6 +525,17 @@ Before Code Review:
    `Documentation update: Not required` with a concise evidence-based reason.
 6. Include documentation changes in the implementation diff and validation appropriate to their
    format.
+7. Record a `Vault Outcome` section in the Implementation Report stating:
+   * whether the vault was consulted during Repository Analysis;
+   * whether the completed Story suggests:
+     * no vault action;
+     * a new candidate note;
+     * an enrich-existing candidate;
+     * a deferred vault action;
+   * the rationale and provenance for that outcome;
+   * the target curated note when enrichment is suggested.
+8. Keep all vault write-side outcomes proposal-only. Implementation must not silently curate or
+   overwrite curated vault notes.
 
 If a required documentation update cannot be completed safely:
 
@@ -529,6 +563,9 @@ The Code Reviewer may recommend approval.
 
 The Code Reviewer may never grant human approval.
 
+Code Review must also verify whether the Implementation Report's vault outcome is appropriate,
+evidence-based, and consistent with the workflow authority boundaries.
+
 ---
 
 ## Engineering Report
@@ -547,6 +584,13 @@ If Code Review approval is missing:
 STOP.
 
 Do not produce the Engineering Report.
+
+The Engineering Report must summarize the final vault outcome for the Story:
+
+* whether curated vault context materially informed the work;
+* whether the Story produced no vault action, a new candidate suggestion, an enrich-existing
+  suggestion, or a deferred vault action;
+* whether the outcome remained proposal-only.
 
 ---
 
