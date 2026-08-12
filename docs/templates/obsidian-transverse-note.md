@@ -2,7 +2,7 @@
 id: concept-example-slug
 title: Example Cross-Project Concept
 kind: concept
-status: draft
+status: curated
 sourceProjects:
   - project-a
   - project-b
@@ -27,6 +27,11 @@ Describe the concept, lesson, or pattern in one concise paragraph.
 ## Cross-Project Relevance
 
 Explain why this matters outside a single repository or single Story.
+
+## Canonical Status
+
+This note is curated transverse memory. It should not contain unresolved
+proposal wording or candidate-only review questions.
 
 ## Provenance
 

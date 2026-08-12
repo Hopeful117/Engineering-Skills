@@ -23,6 +23,25 @@ The vault is not the home for:
 * exhaustive copies of project memory;
 * personal operational notes that belong in workspace memory.
 
+## Feeding Lifecycle
+
+Transverse memory uses a three-step feeding lifecycle:
+
+```text
+source artifact -> candidate note -> curated note
+```
+
+The roles are distinct:
+
+* **source artifacts** remain authoritative for their original engineering or
+  project-memory claims;
+* **candidate notes** are reviewable proposals derived from one or more
+  authoritative sources;
+* **curated notes** are the canonical vault notes.
+
+Automation may help move information from source artifact to candidate note.
+It must not silently move information from candidate note to curated note.
+
 ## Note Contract
 
 The first integration uses plain Markdown notes with simple YAML frontmatter.
@@ -59,9 +78,72 @@ Expected `status` examples:
 
 `sourceProjects` and `provenance` are simple YAML lists in the first version.
 
+Curated notes are canonical vault notes. Candidate notes use a separate
+proposal-oriented template and status model.
+
+## Candidate Note Contract
+
+Candidate notes are proposal records, not canonical transverse knowledge.
+
+Required candidate metadata should include:
+
+* `id`
+* `title`
+* `kind`
+* `status`
+* `candidateSourceTypes`
+* `sourceProjects`
+* `provenance`
+* `transverseRationale`
+
+Candidate statuses may include:
+
+* `proposed`
+* `needs-curation`
+* `superseded`
+
+Candidate notes may also reference an optional target curated note when the
+proposal amends or merges into an existing concept rather than creating a new
+one.
+
+Candidate notes must remain explicitly non-curated and reviewable.
+
+## Source Eligibility
+
+Likely eligible sources include:
+
+* Engineering Reports;
+* Code Review Reports when they contain reusable lessons;
+* ADRs;
+* validated cross-project patterns;
+* selected durable DevLog knowledge.
+
+By default, the following are not sufficient on their own:
+
+* every Story artifact indiscriminately;
+* transient implementation details;
+* purely project-local state;
+* personal workspace memory.
+
+Source eligibility does not imply automatic note creation. Cross-project
+relevance and strong provenance are still required.
+
+## Anti-Flooding Rules
+
+The feeding pipeline should prefer signal over volume.
+
+Expected safeguards:
+
+* not every eligible artifact becomes a candidate note;
+* duplicate or near-duplicate proposals should be merged, linked, or rejected;
+* candidate notes should say whether they propose a new concept or an update to
+  an existing curated note;
+* curated notes should not be overwritten directly by automation.
+
 ## Provenance Rules
 
-Every transverse note must link back to authoritative sources.
+Every candidate and curated transverse note must link back to authoritative
+sources.
 
 Examples:
 
@@ -75,6 +157,12 @@ Examples:
 The vault may summarize or connect knowledge, but it must not become the only
 place where a claim can be verified.
 
+Candidate notes should also preserve enough provenance to explain:
+
+* why the source was considered eligible;
+* why the content appears cross-project rather than project-local;
+* whether the proposal is new or intended to amend an existing concept.
+
 ## Trust Model
 
 When information conflicts:
@@ -84,6 +172,12 @@ When information conflicts:
 * approved workflow artifacts win for workflow reasoning and approval-scoped
   records;
 * the vault provides contextual synthesis and links, not authority overrides.
+
+Within the vault itself:
+
+* curated notes outrank candidate notes for canonical transverse-memory use;
+* candidate notes remain proposals until a human curation decision resolves
+  them.
 
 ## Local Configuration
 
@@ -97,6 +191,30 @@ node transverse-memory/scripts/vault-catalog.mjs --vault-root /path/to/vault
 
 Machine-specific values belong in workspace-local operator context, not in
 committed reusable assets.
+
+## Curation Boundary
+
+Automation may:
+
+* detect eligible source artifacts;
+* generate candidate-note drafts;
+* preserve provenance and backlinks;
+* suggest whether the proposal looks like a new concept or an update to an
+  existing curated note.
+
+Automation must not:
+
+* silently publish curated notes;
+* overwrite curated notes as if curation already occurred;
+* erase source provenance;
+* become a workflow or approval authority.
+
+Human curation remains responsible for:
+
+* accepting a candidate into curated transverse memory;
+* rejecting low-value candidates;
+* merging overlapping proposals;
+* deciding whether to amend an existing curated note.
 
 ## Read-Side Catalog
 
@@ -131,3 +249,15 @@ Manual validation should also confirm that:
 * valid notes are cataloged with stable relative paths;
 * invalid notes fail clearly;
 * no vault file is modified during scanning.
+
+Run:
+
+```text
+node --test transverse-memory/scripts/candidate-note.test.mjs
+```
+
+Manual validation for feeding should also confirm that:
+
+* candidate drafts preserve provenance;
+* generated candidates remain explicitly non-curated;
+* no curated note is modified during proposal generation.
