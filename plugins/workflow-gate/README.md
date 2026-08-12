@@ -9,7 +9,7 @@ Enforces Human Approval Gates through OpenClaw's native `requireApproval` mechan
 ## Features
 
 - **5 custom tools** for workflow state management
-- **Deterministic state machine** — 11 states, 15 transitions
+- **Deterministic state machine** — artifact workflow states with 2 approval gates
 - **Human approval enforcement** — via OpenClaw's `requireApproval`
 - **Artifact hash verification** — SHA-256 at completion, approval, and can-enter
 - **Fail-closed** — deny and timeout do not change state
@@ -78,12 +78,15 @@ STORY_CREATED
   → WAITING_FOR_PLAN_APPROVAL
   → IMPLEMENTATION_IN_PROGRESS
   → CODE_REVIEW_IN_PROGRESS
-  → WAITING_FOR_REVIEW_APPROVAL
   → REPORT_IN_PROGRESS
   → WORKFLOW_COMPLETED
 ```
 
 Any state can transition to `BLOCKED` via `workflow_gate_block`.
+
+`WORKFLOW_COMPLETED` means the formal workflow artifact chain has completed.
+External pull-request validation remains outside this plugin and is orchestrated
+by `engineering-story`.
 
 ## Trust Boundary
 

@@ -229,7 +229,7 @@ When uncertain whether a change is material, Engineering Story must require rene
 
 # Human Approval Gates
 
-The Engineering Story workflow contains three mandatory Human Approval Gates.
+The Engineering Story workflow contains two mandatory Human Approval Gates.
 
 ## Gate 1 — Repository Analysis Approval
 
@@ -273,29 +273,6 @@ Approval allows the workflow to enter Implementation.
 
 ---
 
-## Gate 3 — Code Review Approval
-
-Workflow:
-
-```text
-Approved Implementation Plan
-→ Implementation
-→ Code Review
-→ WAITING_FOR_REVIEW_APPROVAL
-```
-
-Implementation may proceed directly to Code Review without an additional Human Approval Gate.
-
-The Code Review Report must then be presented to the human.
-
-Engineering Story must STOP.
-
-The Engineering Report, finalization, commit, merge, or equivalent completion action must not occur until the human explicitly approves the current Code Review.
-
-Approval allows the workflow to enter finalization.
-
----
-
 # Workflow Sequence
 
 The normal workflow is:
@@ -321,11 +298,11 @@ Documentation Reconciliation
   ↓
 Code Review
   ↓
-STOP
-  ↓
-WAITING_FOR_REVIEW_APPROVAL
-  ↓ explicit human approval
 Engineering Report
+  ↓
+Commit / Push / Pull Request creation
+  ↓
+External human PR validation
   ↓
 Completed
 ```
@@ -593,13 +570,7 @@ Requires:
 * human-approved Implementation Plan;
 * completed Implementation Report;
 * completed Code Review Report;
-* explicit human approval of the current Code Review.
-
-If Code Review approval is missing:
-
-STOP.
-
-Do not produce the Engineering Report.
+* repository state consistent with the reviewed implementation.
 
 The Engineering Report must summarize the final vault outcome for the Story:
 
@@ -618,19 +589,21 @@ Report must also summarize whether the action was:
 
 ---
 
-## Human Commit Boundary and DevLog Lifecycle Complete
+## Delivery Boundary, External PR Validation and DevLog Lifecycle Complete
 
-After Code Review approval (Gate 3) and before producing the Engineering Report:
+After producing the Engineering Report:
 
-1. Tell the human: "Please create the Git commit for this Story. Resume after the commit exists."
-2. Wait for user input. This is a workflow pause point, NOT an Approval Gate. The three existing Approval Gates and their semantics are preserved.
-3. After the human confirms the commit exists, capture `git rev-parse HEAD` as `targetCommit`.
-4. Verify `targetCommit != baseCommit`. If they are equal, tell the human the commit was not detected and stop — the workflow resumes when the commit exists.
-5. Invoke `node scripts/devlog-story.mjs --base-url <url> --project-id <uuid> --story-id <uuid> --operation complete` with `{ targetCommit, baseCommit }` on stdin.
-6. On failure, display a visible `DEVLOG_LIFECYCLE_ERROR` message and continue.
-7. Produce the Engineering Report and mark the workflow as Completed.
+1. Create the Git commit for the Story when the user has delegated that action to Engineering Story. Otherwise, tell the human the final artifact set is ready for commit.
+2. Push the branch and open the pull request when the user has delegated that action to Engineering Story and repository policy requires PR-based remote updates.
+3. Present the PR to the human for final validation.
+4. Wait for explicit human confirmation that the PR has been validated. This validation is outside the formal workflow state machine and is NOT a Human Approval Gate.
+5. After the human confirms PR validation, capture `git rev-parse HEAD` as `targetCommit`.
+6. Verify `targetCommit != baseCommit`. If they are equal, tell the human the commit was not detected and stop — the workflow resumes when the commit exists.
+7. Invoke `node scripts/devlog-story.mjs --base-url <url> --project-id <uuid> --story-id <uuid> --operation complete` with `{ targetCommit, baseCommit }` on stdin.
+8. On failure, display a visible `DEVLOG_LIFECYCLE_ERROR` message and continue.
+9. Mark the Story as Completed.
 
-The human commit boundary is distinct from an Approval Gate. It is a mechanical pause for a Git operation. DevLog complete is a best-effort side effect. Failure must never block finalization.
+External PR validation is distinct from a Human Approval Gate. It is the final human repository-governance check before merge. DevLog complete is a best-effort side effect performed only after that validation is confirmed.
 
 ---
 

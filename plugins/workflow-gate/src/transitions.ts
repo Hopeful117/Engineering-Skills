@@ -22,7 +22,6 @@ const VALID_TRANSITIONS: Record<WorkflowStateName, string[]> = {
   WAITING_FOR_PLAN_APPROVAL: ["request_approval"],
   IMPLEMENTATION_IN_PROGRESS: ["complete_stage"],
   CODE_REVIEW_IN_PROGRESS: ["complete_stage"],
-  WAITING_FOR_REVIEW_APPROVAL: ["request_approval"],
   REPORT_IN_PROGRESS: ["complete_stage"],
   WORKFLOW_COMPLETED: [],
   BLOCKED: ["unblock"],
@@ -71,13 +70,6 @@ export function canCompleteStage(
       reason: "Implementation Plan must be approved before entering Implementation",
     };
   }
-  if (stage === "report" && !state.approvals["review"]) {
-    return {
-      allowed: false,
-      reason: "Code Review must be approved before entering Report",
-    };
-  }
-
   return { allowed: true, reason: "ok" };
 }
 
@@ -230,7 +222,6 @@ function gateNameToKey(gateName: string): string {
   switch (gateName) {
     case "Repository Analysis": return "analysis";
     case "Implementation Plan": return "plan";
-    case "Code Review": return "review";
     default: return gateName.toLowerCase();
   }
 }
