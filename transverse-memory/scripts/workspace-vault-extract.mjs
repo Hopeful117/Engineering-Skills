@@ -41,6 +41,50 @@ const GENERIC_TOKENS = new Set([
   "vault",
   "workflow",
 ]);
+const STORY_ARTIFACT_LAYOUTS = [
+  ["stories"],
+  ["docs", "stories"],
+];
+const STORY_ARTIFACT_NAMES = ["engineering-report.md", "code-review.md"];
+const ARCHITECTURE_DOC_LAYOUTS = [
+  ["docs", "adr"],
+  ["docs", "decisions"],
+];
+const GENERIC_REVIEW_PHRASES = [
+  "review summary",
+  "findings no findings",
+  "story compliance",
+  "plan compliance",
+  "implementation correctness",
+  "architecture compliance",
+];
+const TRANSVERSE_SIGNAL_PHRASES = [
+  "cross-project",
+  "multiple repositories",
+  "across multiple repositories",
+  "across repositories",
+  "reusable pattern",
+  "recurring pattern",
+  "durable",
+  "principle",
+  "standard",
+  "workflow",
+  "quality gate",
+  "provenance",
+  "traceability",
+  "boundary",
+  "governance",
+  "candidate",
+  "candidate-note",
+  "canonical",
+  "transverse",
+  "transverse memory",
+  "quality validation",
+  "curated",
+  "deterministic",
+  "knowledge evolution",
+  "engineering knowledge",
+];
 
 export class WorkspaceVaultExtractError extends Error {
   constructor(message) {
@@ -134,40 +178,48 @@ async function collectLooseVaultNotes(vaultRoot) {
 
 async function collectEligibleFiles(repoRoot) {
   const files = [];
-  const storiesRoot = path.join(repoRoot, "stories");
-  const adrRoot = path.join(repoRoot, "docs", "adr");
-
-  try {
-    const storyDirs = await fs.readdir(storiesRoot, { withFileTypes: true });
-    for (const entry of storyDirs) {
-      if (!entry.isDirectory()) continue;
-      for (const name of ["engineering-report.md", "code-review.md"]) {
-        const absolutePath = path.join(storiesRoot, entry.name, name);
-        try {
-          const stats = await fs.stat(absolutePath);
-          if (stats.isFile()) files.push(absolutePath);
-        } catch {}
+  for (const layout of STORY_ARTIFACT_LAYOUTS) {
+    const storiesRoot = path.join(repoRoot, ...layout);
+    try {
+      const storyDirs = await fs.readdir(storiesRoot, { withFileTypes: true });
+      for (const entry of storyDirs) {
+        if (!entry.isDirectory()) continue;
+        for (const name of STORY_ARTIFACT_NAMES) {
+          const absolutePath = path.join(storiesRoot, entry.name, name);
+          try {
+            const stats = await fs.stat(absolutePath);
+            if (stats.isFile()) files.push(absolutePath);
+          } catch {}
+        }
       }
-    }
-  } catch {}
+    } catch {}
+  }
 
-  try {
-    const adrEntries = await fs.readdir(adrRoot, { withFileTypes: true });
-    for (const entry of adrEntries) {
-      if (!entry.isFile()) continue;
-      if (!entry.name.endsWith(".md")) continue;
-      files.push(path.join(adrRoot, entry.name));
-    }
-  } catch {}
+  for (const layout of ARCHITECTURE_DOC_LAYOUTS) {
+    const docsRoot = path.join(repoRoot, ...layout);
+    try {
+      const entries = await fs.readdir(docsRoot, { withFileTypes: true });
+      for (const entry of entries) {
+        if (!entry.isFile()) continue;
+        if (!entry.name.endsWith(".md")) continue;
+        files.push(path.join(docsRoot, entry.name));
+      }
+    } catch {}
+  }
 
   files.sort((left, right) => left.localeCompare(right));
-  return files;
+  return [...new Set(files)];
 }
 
 function inferSourceType(filePath) {
   if (filePath.endsWith("engineering-report.md")) return "engineering-report";
   if (filePath.endsWith("code-review.md")) return "code-review";
-  if (filePath.includes(`${path.sep}docs${path.sep}adr${path.sep}`)) return "adr";
+  if (
+    filePath.includes(`${path.sep}docs${path.sep}adr${path.sep}`) ||
+    filePath.includes(`${path.sep}docs${path.sep}decisions${path.sep}`)
+  ) {
+    return "adr";
+  }
   return null;
 }
 
@@ -219,7 +271,35 @@ function normalizeTokens(value) {
     .filter((token) => token.length > 2 && !GENERIC_TOKENS.has(token));
 }
 
-function compareWithVault(title, vaultNotes) {
+function uniqueTokens(value) {
+  return [...new Set(normalizeTokens(value))];
+}
+
+function computeSimilarity(leftTokens, rightTokens) {
+  const left = new Set(leftTokens);
+  const right = new Set(rightTokens);
+  const overlap = [...left].filter((token) => right.has(token)).length;
+  const union = new Set([...left, ...right]).size || 1;
+  return { overlap, score: overlap / union };
+}
+
+function looksGenericStoryArtifact(title, summary, sourceType) {
+  if (sourceType === "adr") return false;
+  const loweredTitle = title.trim().toLowerCase();
+  const loweredSummary = summary.trim().toLowerCase();
+  if (loweredTitle === "engineering report" || loweredTitle === "code review report") {
+    return true;
+  }
+  return GENERIC_REVIEW_PHRASES.filter((phrase) => loweredSummary.includes(phrase)).length >= 2;
+}
+
+function hasStrongTransverseSignal(title, summary, sourceType) {
+  if (sourceType === "adr") return true;
+  const text = `${title}\n${summary}`.toLowerCase();
+  return TRANSVERSE_SIGNAL_PHRASES.filter((phrase) => text.includes(phrase)).length >= 2;
+}
+
+function compareWithVault(title, summary, vaultNotes) {
   const normalizedTitle = title.trim().toLowerCase();
   const exactMatch = vaultNotes.find(
     (note) => note.title.trim().toLowerCase() === normalizedTitle,
@@ -228,22 +308,34 @@ function compareWithVault(title, vaultNotes) {
     return { classification: "duplicate", matchedVaultNote: exactMatch.title };
   }
 
-  const titleTokens = new Set(normalizeTokens(title));
+  const titleTokens = uniqueTokens(title);
+  const summaryTokens = uniqueTokens(summary).slice(0, 12);
   let best = null;
 
   for (const note of vaultNotes) {
-    const noteTokens = new Set(normalizeTokens(note.title));
-    const overlap = [...titleTokens].filter((token) => noteTokens.has(token)).length;
-    const union = new Set([...titleTokens, ...noteTokens]).size || 1;
-    const score = overlap / union;
-    if (!best || score > best.score) {
-      best = { note, score, overlap };
+    const noteTokens = uniqueTokens(note.title);
+    const titleSimilarity = computeSimilarity(titleTokens, noteTokens);
+    const summarySimilarity = computeSimilarity(summaryTokens, noteTokens);
+    const combinedScore = titleSimilarity.score + summarySimilarity.score * 0.35;
+    if (!best || combinedScore > best.combinedScore) {
+      best = {
+        note,
+        combinedScore,
+        titleOverlap: titleSimilarity.overlap,
+        summaryOverlap: summarySimilarity.overlap,
+        titleScore: titleSimilarity.score,
+      };
     }
   }
 
-  if (!best || best.overlap === 0) return { classification: "new", matchedVaultNote: null };
-  if (best.score >= 0.6) {
+  if (!best || (best.titleOverlap === 0 && best.summaryOverlap === 0)) {
+    return { classification: "new", matchedVaultNote: null };
+  }
+  if (best.titleScore >= 0.6 || best.titleOverlap >= 3) {
     return { classification: "duplicate", matchedVaultNote: best.note.title };
+  }
+  if (best.titleOverlap >= 1 || best.summaryOverlap >= 2) {
+    return { classification: "enrich-existing", matchedVaultNote: best.note.title };
   }
   return { classification: "enrich-existing", matchedVaultNote: best.note.title };
 }
@@ -283,7 +375,26 @@ async function extractCandidateFromFile(repoRoot, filePath, vaultNotes) {
     title = extractFirstHeading(markdown) ?? path.basename(filePath, ".md");
   }
 
-  const comparison = compareWithVault(title, vaultNotes);
+  if (looksGenericStoryArtifact(title, summary, sourceType)) {
+    return {
+      repositoryRoot: repoRoot,
+      sourceFile: path.relative(repoRoot, filePath).split(path.sep).join("/"),
+      sourceType,
+      classification: "skip",
+      reason: "generic-story-artifact",
+    };
+  }
+  if (!hasStrongTransverseSignal(title, summary, sourceType)) {
+    return {
+      repositoryRoot: repoRoot,
+      sourceFile: path.relative(repoRoot, filePath).split(path.sep).join("/"),
+      sourceType,
+      classification: "skip",
+      reason: "weak-transverse-signal",
+    };
+  }
+
+  const comparison = compareWithVault(title, summary, vaultNotes);
   const payload = {
     title,
     kind: inferKind(sourceType),
