@@ -43,6 +43,7 @@ The repository follows these principles:
 * Separate responsibilities.
 * Prefer explicit workflows over autonomous behavior.
 * Keep humans responsible for approvals and merges.
+* Treat pull request validation as the final human acceptance boundary when repository policy requires PR-based delivery.
 * Produce standardized engineering artifacts.
 * Do not invent missing context.
 * Do not skip validation.

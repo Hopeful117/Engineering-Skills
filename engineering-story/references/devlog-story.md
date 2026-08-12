@@ -62,7 +62,7 @@ Stdout JSON:
 
 ### Complete
 
-Complete the Story after the human creates the Git commit following the Engineering Report.
+Complete the Story only after the human has validated the pull request generated from the completed Engineering Report and committed branch state.
 
 ```text
 node scripts/devlog-story.mjs --base-url <url> --project-id <uuid> --story-id <uuid> --operation complete
@@ -73,7 +73,7 @@ Stdin JSON:
 { "targetCommit": "40-character-hex-sha", "baseCommit": "40-character-hex-sha" }
 ```
 
-The `targetCommit` is captured via `git rev-parse HEAD` after the human confirms the commit exists. The adapter verifies `targetCommit != baseCommit`.
+The `targetCommit` is captured via `git rev-parse HEAD` after the human confirms PR validation and the commit exists. The adapter verifies `targetCommit != baseCommit`.
 
 Stdout JSON:
 ```json
@@ -121,7 +121,7 @@ DevLog records engineering history. The workflow-gate controls human approval. E
 
 - DevLog lifecycle state (REGISTERED, IN_PROGRESS, COMPLETED) is a record, not authority.
 - The workflow-gate remains authoritative for workflow progression.
-- The human owns the Git commit. Engineering-Skills never automates commits, pushes, or merges.
+- The human owns final repository acceptance. Engineering-Skills may create commits or open pull requests only when explicitly delegated, but final PR validation remains human-owned.
 
 ## Configuration
 

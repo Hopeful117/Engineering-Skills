@@ -181,7 +181,7 @@ export default defineToolPlugin({
       name: "workflow_gate_complete_stage",
       label: "Workflow Gate Complete Stage",
       description:
-        "Mark the current stage as complete. Computes artifact hash and transitions to the next state (which may be a WAITING_FOR_*_APPROVAL state).",
+        "Mark the current stage as complete. Computes artifact hash and transitions to the next state, which may be an approval state for analysis or plan.",
       parameters: Type.Object({
         storyId: Type.String({ description: "Story ID" }),
         stage: Type.String({

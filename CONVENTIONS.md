@@ -173,7 +173,7 @@ Examples include:
 
 * Repository Analysis approval;
 * Implementation Plan approval;
-* Final review approval.
+* explicit external pull request validation before merge when repository policy requires it.
 
 ---
 

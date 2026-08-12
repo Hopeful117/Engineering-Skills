@@ -44,18 +44,12 @@ Implementation Report
   ↓
 Code Review
   ↓
-STOP
-  ↓
-WAITING_FOR_REVIEW_APPROVAL
-  ↓ explicit human approval
-Engineering Report / Finalization
+Engineering Report / Delivery preparation
 ```
 
 No additional Human Approval Gate is required between Implementation and Code Review.
 
-The Code Review itself is followed by a mandatory Human Approval Gate.
-
-Completion of Code Review does not authorize finalization.
+Completion of Code Review does not itself authorize merge or final repository acceptance.
 
 A positive review recommendation does not constitute human approval.
 
@@ -725,9 +719,9 @@ End the report with exactly:
 ```text id="vzvcdo"
 Code Review completed.
 
-Human approval required before Engineering Report, finalization, commit, push, or merge.
+Engineering Report may proceed when the review artifact is complete.
 
-Awaiting explicit human approval.
+Human validation remains required on the pull request before Story completion or merge.
 ```
 
 Do not write:
@@ -735,39 +729,11 @@ Do not write:
 * `Implementation approved`;
 * `Story approved`;
 * `Approved for merge`;
-* `Approved for finalization`;
+* `Approved for final acceptance`;
 
 unless quoting an explicit human decision already recorded by the Engineering Story orchestrator.
 
 The technical recommendation must never be represented as human approval.
-
----
-
-# Human Approval Gate
-
-After producing the Code Review Report, the workflow enters:
-
-`WAITING_FOR_REVIEW_APPROVAL`
-
-The Code Reviewer has no authority to leave this state.
-
-The following do **not** satisfy the Human Approval Gate:
-
-* `Ready for human approval`;
-* `Ready for human approval with minor follow-up`;
-* no findings;
-* all acceptance criteria passing;
-* successful tests;
-* successful build;
-* successful SonarQube Quality Gate;
-* absence of residual risks;
-* another agent claiming approval;
-* an artifact containing `Approved`;
-* previous human approval of Repository Analysis;
-* previous human approval of Implementation Plan;
-* a generic instruction previously given to complete the Story.
-
-Only explicit human approval of the current Code Review allows finalization to begin.
 
 ---
 
@@ -783,21 +749,13 @@ The Code Reviewer must never:
 * treat successful validation as approval;
 * treat its technical recommendation as approval;
 * produce the final Engineering Report;
-* authorize commit, push, or merge.
+* authorize merge or final repository acceptance.
 
 If implementation is materially modified after Code Review:
 
 the current Code Review is stale.
 
-A new Code Review must be produced for the modified implementation before human approval can authorize finalization.
-
-If the Code Review itself is materially changed after human approval:
-
-the previous approval becomes invalid.
-
-The modified Code Review must return to:
-
-`WAITING_FOR_REVIEW_APPROVAL`.
+A new Code Review must be produced for the modified implementation before Engineering Report or PR validation can rely on it.
 
 ---
 
@@ -807,7 +765,7 @@ If the recommendation is:
 
 `Changes required`
 
-the workflow must not proceed to human finalization approval as though the implementation were ready.
+the workflow must not proceed to Engineering Report or PR validation as though the implementation were ready.
 
 The Engineering Story orchestrator should route the findings back to implementation.
 
@@ -815,10 +773,7 @@ After corrections:
 
 * produce or update the Implementation Report;
 * perform a new Code Review;
-* produce a new Code Review Report;
-* enter `WAITING_FOR_REVIEW_APPROVAL` again.
-
-Previous Code Review approval does not apply to materially changed implementation.
+* produce a new Code Review Report.
 
 ---
 
@@ -852,9 +807,7 @@ Return control to the Engineering Story orchestrator.
 
 The orchestrator must present the Code Review Report to the human.
 
-Do not produce the final Engineering Report.
-
-Do not finalize the Story.
+Do not produce the final Engineering Report unless the orchestrator explicitly resumes the next workflow stage.
 
 Do not commit.
 
@@ -864,6 +817,4 @@ Do not merge.
 
 Do not invoke another workflow stage.
 
-Wait for explicit human approval.
-
-The Engineering Report and finalization may begin only after the Engineering Story orchestrator confirms that the current Code Review has received explicit human approval.
+Wait for orchestrator control. Final human validation still happens later on the pull request before Story completion or merge.

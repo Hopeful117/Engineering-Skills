@@ -8,7 +8,6 @@ export type WorkflowStateName =
   | "WAITING_FOR_PLAN_APPROVAL"
   | "IMPLEMENTATION_IN_PROGRESS"
   | "CODE_REVIEW_IN_PROGRESS"
-  | "WAITING_FOR_REVIEW_APPROVAL"
   | "REPORT_IN_PROGRESS"
   | "WORKFLOW_COMPLETED"
   | "BLOCKED";
@@ -70,7 +69,7 @@ export const STAGE_TO_COMPLETION_STATE: Record<StageName, WorkflowStateName> = {
   analysis: "WAITING_FOR_ANALYSIS_APPROVAL",
   plan: "WAITING_FOR_PLAN_APPROVAL",
   implementation: "CODE_REVIEW_IN_PROGRESS",
-  review: "WAITING_FOR_REVIEW_APPROVAL",
+  review: "REPORT_IN_PROGRESS",
   report: "WORKFLOW_COMPLETED",
 };
 
@@ -78,19 +77,16 @@ export const STAGE_TO_COMPLETION_STATE: Record<StageName, WorkflowStateName> = {
 export const APPROVAL_TO_NEXT_STATE: Partial<Record<WorkflowStateName, WorkflowStateName>> = {
   WAITING_FOR_ANALYSIS_APPROVAL: "PLAN_IN_PROGRESS",
   WAITING_FOR_PLAN_APPROVAL: "IMPLEMENTATION_IN_PROGRESS",
-  WAITING_FOR_REVIEW_APPROVAL: "REPORT_IN_PROGRESS",
 };
 
 // Map approval states to their gate names (only approval states have gates)
 export const APPROVAL_TO_GATE_NAME: Partial<Record<WorkflowStateName, string>> = {
   WAITING_FOR_ANALYSIS_APPROVAL: "Repository Analysis",
   WAITING_FOR_PLAN_APPROVAL: "Implementation Plan",
-  WAITING_FOR_REVIEW_APPROVAL: "Code Review",
 };
 
 // Map approval states to expected artifact paths (only approval states have artifacts)
 export const APPROVAL_TO_ARTIFACT_PATH: Partial<Record<WorkflowStateName, string>> = {
   WAITING_FOR_ANALYSIS_APPROVAL: "repository-analysis.md",
   WAITING_FOR_PLAN_APPROVAL: "implementation-plan.md",
-  WAITING_FOR_REVIEW_APPROVAL: "code-review.md",
 };
