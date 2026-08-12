@@ -51,6 +51,8 @@ Delivery preparation
   ↓
 Human PR validation
   ↓
+Systematic local cleanup
+  ↓
 Completed
 ```
 
@@ -438,7 +440,6 @@ Use:
 
 * Repository Analysis: Human approved
 * Implementation Plan: Human approved
-* Code Review: Human approved
 
 Only use `Human approved` when verified workflow state confirms it.
 
@@ -494,7 +495,8 @@ Use when:
 * Story implementation is complete;
 * required validation is satisfactory;
 * Code Review is complete;
-* the current Code Review received explicit human approval;
+* final human PR validation is confirmed;
+* required local cleanup finalization has completed safely or been explicitly recorded as safely skipped/blocked without destructive action;
 * no required Story work remains.
 
 ### Completed with Follow-up
@@ -527,7 +529,7 @@ A Story must never be marked `Completed` solely because implementation and tests
 # Completion Semantics
 
 `Completed` means the Engineering Story workflow has successfully passed all required stages and Human Approval Gates.
-It also requires the human to validate the pull request that carries the final Story change.
+It also requires the human to validate the pull request that carries the final Story change and for workflow-owned local cleanup finalization to be resolved safely.
 
 It requires:
 
@@ -547,6 +549,8 @@ AND
 Engineering Report produced
 AND
 Human PR validation confirmed
+AND
+Local cleanup finalization resolved safely
 ```
 
 Technical success without required human approval is not workflow completion.

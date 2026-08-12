@@ -175,6 +175,11 @@ Examples include:
 * Implementation Plan approval;
 * explicit external pull request validation before merge when repository policy requires it.
 
+When a workflow owns repository delivery through commit and pull request
+creation, it should also define a conservative post-validation local cleanup
+policy. That cleanup must never delete unmerged branches or discard unrelated
+local work.
+
 ---
 
 # Engineering Artifacts

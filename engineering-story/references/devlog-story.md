@@ -73,7 +73,7 @@ Stdin JSON:
 { "targetCommit": "40-character-hex-sha", "baseCommit": "40-character-hex-sha" }
 ```
 
-The `targetCommit` is captured via `git rev-parse HEAD` after the human confirms PR validation and the commit exists. The adapter verifies `targetCommit != baseCommit`.
+The `targetCommit` is captured via `git rev-parse HEAD` after the human confirms PR validation and the commit exists, before any later local cleanup changes branch position. The adapter verifies `targetCommit != baseCommit`.
 
 Stdout JSON:
 ```json
@@ -122,6 +122,7 @@ DevLog records engineering history. The workflow-gate controls human approval. E
 - DevLog lifecycle state (REGISTERED, IN_PROGRESS, COMPLETED) is a record, not authority.
 - The workflow-gate remains authoritative for workflow progression.
 - The human owns final repository acceptance. Engineering-Skills may create commits or open pull requests only when explicitly delegated, but final PR validation remains human-owned.
+- Local cleanup after PR validation is repository housekeeping owned by `engineering-story`, not by DevLog and not by delegated implementation providers.
 
 ## Configuration
 
