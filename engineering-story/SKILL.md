@@ -304,6 +304,8 @@ Commit / Push / Pull Request creation
   ↓
 External human PR validation
   ↓
+Systematic local cleanup
+  ↓
 Completed
 ```
 
@@ -601,9 +603,16 @@ After producing the Engineering Report:
 6. Verify `targetCommit != baseCommit`. If they are equal, tell the human the commit was not detected and stop — the workflow resumes when the commit exists.
 7. Invoke `node scripts/devlog-story.mjs --base-url <url> --project-id <uuid> --story-id <uuid> --operation complete` with `{ targetCommit, baseCommit }` on stdin.
 8. On failure, display a visible `DEVLOG_LIFECYCLE_ERROR` message and continue.
-9. Mark the Story as Completed.
+9. Perform a conservative local cleanup finalization:
+   * `git fetch --prune` to refresh remote state;
+   * switch to local `main` only when the working tree and branch transition are safe;
+   * fast-forward local `main` from `origin/main` when possible;
+   * delete only eligible merged local Story branches that are already obsolete;
+   * never rewrite history, never discard unrelated local changes, and never delete unmerged branches.
+10. If cleanup cannot be executed safely, stop and report the cleanup outcome explicitly instead of forcing Git state changes.
+11. Mark the Story as Completed only after cleanup finalization has succeeded or been explicitly recorded as safely skipped/blocked without destructive action.
 
-External PR validation is distinct from a Human Approval Gate. It is the final human repository-governance check before merge. DevLog complete is a best-effort side effect performed only after that validation is confirmed.
+External PR validation is distinct from a Human Approval Gate. It is the final human repository-governance check before merge. DevLog complete is a best-effort side effect performed only after that validation is confirmed. Local cleanup is workflow-owned housekeeping, not delegated implementation work and not a Human Approval Gate.
 
 ---
 

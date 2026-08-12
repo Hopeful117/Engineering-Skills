@@ -172,6 +172,10 @@ OpenCode must never:
 
 OpenCode must detect existing working-tree changes before implementation.
 
+Post-validation local cleanup, including branch deletion of obsolete merged
+Story branches, remains owned by the `engineering-story` orchestrator after
+human PR validation. It must not be delegated to OpenCode.
+
 ---
 
 # Implementation Rules
@@ -299,4 +303,3 @@ Engineering Story decides **what** should be implemented.
 OpenCode decides **how** to implement the approved work.
 
 The human engineer remains responsible for every engineering approval.
-

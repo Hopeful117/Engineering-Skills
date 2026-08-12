@@ -44,6 +44,7 @@ The repository follows these principles:
 * Prefer explicit workflows over autonomous behavior.
 * Keep humans responsible for approvals and merges.
 * Treat pull request validation as the final human acceptance boundary when repository policy requires PR-based delivery.
+* Return the local repository to a safe post-delivery state after validated workflow completion when cleanup can be performed conservatively.
 * Produce standardized engineering artifacts.
 * Do not invent missing context.
 * Do not skip validation.
@@ -99,9 +100,11 @@ Implementation
   ↓
 Code Review
   ↓
-Human Approval
-  ↓
 Engineering Report
+  ↓
+ Pull Request validation
+  ↓
+ Systematic local cleanup
 ```
 
 The skill acts as an Engineering Coordinator.
