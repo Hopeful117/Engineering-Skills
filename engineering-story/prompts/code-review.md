@@ -357,7 +357,9 @@ When the Implementation Report includes a `Vault Outcome` section, verify:
 * the reported vault consultation status matches the Repository Analysis;
 * any suggested new note or enrich-existing candidate is supported by completed Story evidence;
 * the recommendation does not treat the vault as authoritative project-state truth;
-* the outcome remains proposal-only unless the approved Story explicitly included vault mutation work.
+* the outcome remains proposal-only unless the approved Story explicitly included vault mutation work;
+* any `vault-outcome.json` artifact matches the reviewed Story outcome;
+* any repository-owned proposal artifact reflects deterministic duplicate suppression rather than duplicate churn.
 
 ---
 

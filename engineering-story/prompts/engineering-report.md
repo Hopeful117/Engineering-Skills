@@ -415,7 +415,8 @@ Summarize:
 
 * whether curated vault context materially informed the Story;
 * whether the final outcome was no vault action, a new candidate suggestion, an enrich-existing suggestion, or a deferred vault action;
-* whether that outcome remained proposal-only.
+* whether that outcome remained proposal-only;
+* whether continuous feeding created, updated, skipped, or did not require a repository-owned proposal artifact.
 
 ---
 

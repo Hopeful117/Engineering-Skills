@@ -140,6 +140,12 @@ Expected safeguards:
   an existing curated note;
 * curated notes should not be overwritten directly by automation.
 
+For steady-state workflow feeding, duplicate suppression should also consider:
+
+* existing repository-owned proposal artifacts;
+* repeated Story provenance already attached to a proposal;
+* no-op replays of the same Story outcome.
+
 ## Provenance Rules
 
 Every candidate and curated transverse note must link back to authoritative
@@ -215,6 +221,29 @@ Human curation remains responsible for:
 * rejecting low-value candidates;
 * merging overlapping proposals;
 * deciding whether to amend an existing curated note.
+
+## Continuous Feeding
+
+Bootstrap extraction and continuous feeding are different workflows.
+
+Use continuous feeding when a completed Story has already produced an explicit
+vault outcome through `engineering-story`.
+
+The first continuous workflow should:
+
+* record a structured Story-local `vault-outcome.json` artifact;
+* generate or update repository-owned proposal artifacts under
+  `transverse-memory/proposals/`;
+* keep those proposal artifacts outside the curated vault;
+* use deterministic duplicate suppression based on proposal key, Story
+  provenance, and current curated vault state;
+* remain lighter than broad workspace extraction.
+
+Continuous feeding should not:
+
+* rescan repositories broadly;
+* parse loose prose when a structured Story artifact is available;
+* publish directly into the curated vault.
 
 ## Read-Side Catalog
 

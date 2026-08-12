@@ -536,6 +536,14 @@ Before Code Review:
    * the target curated note when enrichment is suggested.
 8. Keep all vault write-side outcomes proposal-only. Implementation must not silently curate or
    overwrite curated vault notes.
+9. When the vault outcome is `new candidate note` or `enrich-existing candidate`, produce a
+   structured Story-local artifact named `vault-outcome.json` in the current Story directory.
+10. Treat `vault-outcome.json` as the authoritative proposal input for continuous feeding. The
+    Implementation Report remains the human-readable explanation.
+11. When `vault-outcome.json` is eligible for proposal generation, generate or update a
+    repository-owned proposal artifact under `transverse-memory/proposals/` before Code Review.
+12. The proposal artifact must remain outside the curated vault and must remain explicitly
+    proposal-only.
 
 If a required documentation update cannot be completed safely:
 
@@ -566,6 +574,14 @@ The Code Reviewer may never grant human approval.
 Code Review must also verify whether the Implementation Report's vault outcome is appropriate,
 evidence-based, and consistent with the workflow authority boundaries.
 
+Code Review must also verify that any generated `vault-outcome.json` and repository-owned proposal
+artifact are:
+
+* consistent with the Implementation Report;
+* deterministically derived from Story evidence;
+* free from duplicate proposal churn for the same Story outcome;
+* still proposal-only and outside the curated vault.
+
 ---
 
 ## Engineering Report
@@ -591,6 +607,14 @@ The Engineering Report must summarize the final vault outcome for the Story:
 * whether the Story produced no vault action, a new candidate suggestion, an enrich-existing
   suggestion, or a deferred vault action;
 * whether the outcome remained proposal-only.
+
+When continuous feeding generated or updated a repository-owned proposal artifact, the Engineering
+Report must also summarize whether the action was:
+
+* created;
+* updated;
+* skipped as duplicate/no-op;
+* not applicable.
 
 ---
 

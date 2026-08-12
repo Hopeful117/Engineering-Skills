@@ -402,6 +402,13 @@ All vault write-side outcomes remain proposal-only at this stage.
 
 Implementation must not silently create, edit, or overwrite curated vault notes unless the approved Story explicitly authorizes that repository mutation.
 
+When the vault outcome is `new candidate note` or `enrich-existing candidate`, implementation must also:
+
+* create a structured `vault-outcome.json` artifact in the current Story directory;
+* treat that file as the authoritative machine-readable proposal input;
+* generate or update a repository-owned proposal artifact under `transverse-memory/proposals/`;
+* keep that proposal artifact outside the curated vault and explicitly non-curated.
+
 ---
 
 # Validation Failures

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "vault-outcome-v1",
+  "storyId": "0014",
+  "storyTitle": "Design a Continuous Workflow for Feeding the Obsidian Vault",
+  "storyPath": "stories/0014-continuous-vault-feeding-workflow",
+  "vaultConsulted": true,
+  "outcome": "enrich-existing",
+  "candidateTitle": "Continuous Vault Feeding Workflow",
+  "candidateKind": "pattern",
+  "targetCuratedNote": "Fluid Knowledge Feeding Pipeline",
+  "sourceProjects": [
+    "Engineering-Skills"
+  ],
+  "provenance": [
+    "stories/0014-continuous-vault-feeding-workflow/implementation-report.md",
+    "docs/references/continuous-vault-feeding.md",
+    "transverse-memory/scripts/story-vault-feed.mjs"
+  ],
+  "transverseRationale": "Reusable across repositories because it defines a lightweight deterministic path from completed Story outcomes to proposal-only transverse-memory candidates without writing directly into the curated vault.",
+  "proposedSynthesis": "Use a structured Story-local vault outcome plus a repository-owned proposal backlog to turn completed workflow outcomes into reviewable transverse-memory proposals with duplicate suppression.",
+  "curationNotes": "This likely enriches the existing Fluid Knowledge Feeding Pipeline note by adding the steady-state Story-scoped workflow path that complements broad bootstrap extraction.",
+  "created": "2026-08-12"
+}
