@@ -261,3 +261,28 @@ Manual validation for feeding should also confirm that:
 * candidate drafts preserve provenance;
 * generated candidates remain explicitly non-curated;
 * no curated note is modified during proposal generation.
+
+## Punctual Workspace Extraction
+
+Bootstrap extraction across repositories is a separate, operator-triggered
+workflow.
+
+Its purpose is to inspect selected repositories and artifact classes, compare
+them against the current curated vault, and surface proposal-only candidates.
+
+Expected properties:
+
+* selective rather than exhaustive;
+* vault-aware rather than vault-blind;
+* provenance-preserving;
+* proposal-only;
+* manually triggered and reviewed.
+
+The preferred outputs are:
+
+* likely new candidate;
+* likely enrichment of an existing curated note;
+* likely duplicate or skip.
+
+Punctual extraction should align with the candidate-note contract introduced in
+the steady-state feeding model. It must not invent a competing note lifecycle.

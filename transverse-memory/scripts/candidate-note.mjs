@@ -112,10 +112,13 @@ function validateInput(payload) {
     "proposedSynthesis",
   );
   const curationNotes = requireString(payload.curationNotes, "curationNotes");
-  const targetCuratedNote =
-    payload.targetCuratedNote === undefined || payload.targetCuratedNote === null
-      ? ""
-      : requireString(payload.targetCuratedNote, "targetCuratedNote");
+  let targetCuratedNote = "";
+  if (payload.targetCuratedNote !== undefined && payload.targetCuratedNote !== null) {
+    if (typeof payload.targetCuratedNote !== "string") {
+      throw new CandidateNoteError("targetCuratedNote must be a string when present");
+    }
+    targetCuratedNote = payload.targetCuratedNote.trim();
+  }
   const created = payload.created ? requireString(payload.created, "created") : "YYYY-MM-DD";
 
   return {
@@ -177,6 +180,20 @@ ${payload.curationNotes}
 `;
 }
 
+export function generateCandidateNote(payload) {
+  const validated = validateInput(payload);
+  const markdown = toMarkdown(validated);
+
+  return {
+    mode: "proposal-only",
+    createsCuratedNote: false,
+    updatesCuratedNoteDirectly: false,
+    candidateId: slugify(validated.title),
+    targetCuratedNote: validated.targetCuratedNote || null,
+    markdown,
+  };
+}
+
 export async function generateCandidateNoteFromFile(sourceFile) {
   const resolvedSource = await validateSourceFile(sourceFile);
   let payload;
@@ -186,17 +203,9 @@ export async function generateCandidateNoteFromFile(sourceFile) {
     throw new CandidateNoteError("Source file contains invalid JSON");
   }
 
-  const validated = validateInput(payload);
-  const markdown = toMarkdown(validated);
-
   return {
     sourceFile: resolvedSource,
-    mode: "proposal-only",
-    createsCuratedNote: false,
-    updatesCuratedNoteDirectly: false,
-    candidateId: slugify(validated.title),
-    targetCuratedNote: validated.targetCuratedNote || null,
-    markdown,
+    ...generateCandidateNote(payload),
   };
 }
 
