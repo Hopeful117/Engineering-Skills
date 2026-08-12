@@ -338,6 +338,24 @@ Developer OS may eventually provide:
 
 Engineering Skills remains responsible for reusable workflow definitions and skill standards.
 
+### Memory Ecosystem
+
+Engineering Skills is not itself a project-memory database or a transverse
+knowledge base.
+
+Within the wider ecosystem:
+
+* **DevLog** owns structured, project-scoped engineering memory;
+* **Engineering Artifacts** own workflow-stage records and approval-traceable
+  engineering outputs;
+* **workspace memory** owns local personal and operational continuity;
+* an **Obsidian vault** may own curated, cross-project transverse knowledge;
+* **Developer OS** may later federate those memory layers.
+
+Engineering Skills may define reusable contracts and adapters around those
+layers, but it must not transfer workflow authority or approval authority to a
+memory system.
+
 ---
 
 ## Contributing
