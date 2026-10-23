@@ -69,7 +69,9 @@ Use the repository's established convention when one exists. Otherwise use:
 
 * Commit: `feat(story-<id>): <imperative summary>`
 * PR title: `feat(story-<id>): <imperative summary>`
-* Merge commit (when the provider requires one): `merge(story-<id>): <summary>`
+* Merge commit: use the provider-generated `Merge pull request #<number> from
+  <source-branch>` format established by this repository. Do not replace it
+  with a squash commit unless the user explicitly requests an exception.
 * Cleanup report: `chore(story-<id>): remove obsolete delivery branches` only if
   the repository actually requires a cleanup commit; branch deletion normally
   needs no commit.
@@ -84,7 +86,8 @@ Use the dedicated prompts in order:
 1. `prompts/preflight.md`: inspect state and produce a delivery plan.
 2. `prompts/commit.md`: create one focused commit on the dedicated branch.
 3. `prompts/pull-request.md`: push and create the PR with traceable metadata.
-4. `prompts/merge.md`: wait for human PR validation, then merge using policy.
+4. `prompts/merge.md`: wait for human PR validation, then merge through the
+   repository's established GitHub merge-commit method.
 5. `prompts/cleanup.md`: refresh remote state and remove only safely obsolete branches.
 
 After every step, record the result in the closure report. If a command fails,

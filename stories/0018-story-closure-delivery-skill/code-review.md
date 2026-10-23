@@ -13,6 +13,8 @@ documentation updates, and confirmed deletion set.
 * The commit and PR message convention includes the Story identifier.
 * The OpenCode symbolic link resolves to the repository source directory.
 * The confirmed deletions are visible and are not silently restored.
+* The merge prompt follows the repository's established GitHub merge-commit
+  methodology and rejects silent squash/rebase fallback.
 
 ## Residual Risk
 

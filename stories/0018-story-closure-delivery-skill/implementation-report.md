@@ -50,3 +50,10 @@ Completed. The README and changelog now mention `story-closure`.
 
 Commit, push, pull-request creation, human PR validation, merge, and safe branch
 cleanup remain delivery actions.
+
+## Merge Methodology Update
+
+The repository history was checked after PR creation. Previous PRs `#5` and `#6`
+use provider-generated GitHub merge commits. The skill now requires that method
+by default and treats a merge-permission failure as a blocker rather than
+falling back to squash or rebase.

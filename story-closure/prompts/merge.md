@@ -2,7 +2,8 @@
 
 ## Mission
 
-Merge a human-validated Story pull request using the repository's approved policy.
+Merge a human-validated Story pull request using the repository's established
+GitHub merge-commit methodology.
 
 ## Preconditions
 
@@ -14,10 +15,14 @@ Merge a human-validated Story pull request using the repository's approved polic
 ## Procedure
 
 1. Re-read the PR status immediately before merging.
-2. Prefer the repository's configured merge method; otherwise use squash when
-   policy permits and preserve the Story identifier in the merge message.
-3. Verify the resulting merged state and target branch commit.
-4. Do not delete branches in this stage unless cleanup has separately been
+2. Use the provider's normal merge-commit operation, matching the repository's
+   history (`Merge pull request #<number> from <source-branch>`). Do not use
+   squash or rebase unless the user explicitly authorizes an exception.
+3. If the API or token cannot perform that operation, stop and report the
+   permission failure. Do not silently fall back to squash, force-push, or a
+   local history rewrite.
+4. Verify the resulting merged state and target branch commit.
+5. Do not delete branches in this stage unless cleanup has separately been
    authorized and all cleanup preconditions are met.
 
 ## Deliverable
