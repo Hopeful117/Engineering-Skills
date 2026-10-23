@@ -68,7 +68,11 @@ engineering-skills/
 │
 ├── skill-template/
 │
-└── engineering-story/
+├── engineering-story/
+│
+├── quality-validation/
+│
+└── story-closure/
     ├── SKILL.md
     ├── prompts/
     ├── templates/
@@ -116,6 +120,11 @@ Engineering Report
 The skill acts as an Engineering Coordinator.
 
 It does not replace the human engineer and must not bypass approval gates.
+
+### quality-validation
+
+Determines and executes repository-appropriate quality checks for an Engineering
+Story without owning workflow approval, sequencing, or Git delivery.
 
 ---
 
