@@ -1,0 +1,977 @@
+---
+name: "engineering-story"
+description: "Orchestrate Engineering Stories with approval gates, DevLog context, and documentation reconciliation."
+---
+
+# Engineering Story
+
+## Mission
+
+Engineering Story is the orchestrator of the engineering workflow.
+
+It coordinates the complete lifecycle of an Engineering Story while preserving:
+
+* engineering governance;
+* explicit human approval;
+* architecture constraints;
+* workflow sequencing;
+* provider independence;
+* traceability of engineering artifacts.
+
+Engineering Story owns workflow orchestration.
+
+Execution may be delegated.
+
+Governance may not.
+
+---
+
+# Workflow Authority
+
+Engineering Story is the sole orchestrator of the Engineering Story workflow.
+
+It is responsible for:
+
+* determining the current workflow stage;
+* determining which artifact may be produced next;
+* enforcing Human Approval Gates;
+* validating workflow preconditions;
+* invoking specialized workflow roles;
+* invoking Delegate Task only when delegation is allowed;
+* preventing later workflow stages from running before their prerequisites are satisfied;
+* returning control to the human when a STOP condition or Human Approval Gate is reached.
+
+No execution provider, delegated agent, generated artifact, report, model output, or workflow role may advance the workflow independently.
+
+Workflow sequencing is controlled exclusively by Engineering Story.
+
+---
+
+# Workflow Roles
+
+The Engineering Story workflow uses specialized roles.
+
+## Repository Analysis
+
+Responsible for understanding:
+
+* the Story;
+* repository structure;
+* existing implementation;
+* architecture;
+* relevant ADRs;
+* affected modules;
+* constraints;
+* risks;
+* missing information.
+
+Produces:
+
+`Repository Analysis`
+
+---
+
+## Implementation Planning
+
+Responsible for transforming a human-approved Repository Analysis into an actionable implementation strategy.
+
+Produces:
+
+`Implementation Plan`
+
+---
+
+## Implementation
+
+Responsible for executing the human-approved Implementation Plan.
+
+Implementation may be delegated through Delegate Task.
+
+Produces:
+
+`Implementation Report`
+
+---
+
+## Documentation Reconciliation
+
+Responsible for determining whether the implemented Story changes repository behavior, contracts,
+configuration, setup, architecture, operations, or user-facing capabilities documented by the
+repository.
+
+When documentation is affected, update only the relevant canonical repository documentation and
+include those changes in the implementation diff. When no update is necessary, record that
+conclusion and its basis in the Implementation Report.
+
+Documentation reconciliation is part of implementation completion. It occurs before Code Review so
+that documentation changes are reviewed with the implementation.
+
+Produces:
+
+* updated repository documentation when necessary;
+* an explicit documentation outcome in the Implementation Report.
+
+---
+
+## Code Review
+
+Responsible for independently verifying:
+
+* Story compliance;
+* plan compliance;
+* implementation correctness;
+* architecture compliance;
+* documentation accuracy and completeness for the implemented change;
+* test coverage;
+* validation evidence;
+* residual risks.
+
+Produces:
+
+`Code Review Report`
+
+---
+
+## Engineering Reporting
+
+Responsible for producing the final engineering record after all required Human Approval Gates have been satisfied.
+
+Produces:
+
+`Engineering Report`
+
+---
+
+# Human Approval Protocol
+
+Human approval is an explicit action performed by the human user.
+
+Approval is a workflow event.
+
+It is not a conclusion that may be inferred from repository state, artifact contents, validation results, model output, or previous workflow activity.
+
+Only the human user may satisfy a Human Approval Gate.
+
+Engineering Story must never infer approval from:
+
+* successful completion of a workflow stage;
+* successful tests;
+* successful builds;
+* a successful Quality Gate;
+* absence of user objections;
+* an artifact existing;
+* an artifact being marked `Ready`, `Approved`, `Completed`, or equivalent;
+* a recommendation produced by an agent;
+* a delegated execution provider claiming that approval occurred;
+* another workflow role claiming that approval occurred;
+* previous approval of another artifact;
+* a generic request to execute or continue the overall Story;
+* previous user approval of an earlier workflow gate.
+
+An AI agent or execution provider may recommend approval.
+
+It may never grant approval.
+
+An artifact may describe its own readiness or recommendation.
+
+It may never establish workflow approval state.
+
+---
+
+# Current Gate Only
+
+Human approval applies only to the Human Approval Gate currently waiting for approval.
+
+For example:
+
+`Approve and continue Story <id>`
+
+means:
+
+1. approve the artifact associated with the current pending Human Approval Gate;
+2. advance the workflow through that gate;
+3. execute the next permitted workflow stage;
+4. stop again when the next Human Approval Gate or STOP condition is reached.
+
+It does not approve future gates.
+
+Approval must never cascade across multiple Human Approval Gates.
+
+---
+
+# Continue Is Not Approval
+
+`Continue Story <id>` does not grant human approval.
+
+If no Human Approval Gate is pending, Engineering Story may resume the workflow from its current state.
+
+If a Human Approval Gate is pending, Engineering Story must not advance.
+
+It must inform the user which approval is required.
+
+Only an explicit approval action may satisfy the gate.
+
+---
+
+# Approval Validity
+
+Approval applies to the specific artifact version presented to the human.
+
+If an approved artifact is materially modified after approval, its approval becomes invalid.
+
+The workflow must return to the corresponding Human Approval Gate before any dependent stage may continue.
+
+Minor non-semantic formatting changes do not require renewed approval.
+
+When uncertain whether a change is material, Engineering Story must require renewed human approval.
+
+---
+
+# Human Approval Gates
+
+The Engineering Story workflow contains two mandatory Human Approval Gates.
+
+## Gate 1 — Repository Analysis Approval
+
+Workflow:
+
+```text
+Engineering Story
+→ Repository Analysis
+→ WAITING_FOR_ANALYSIS_APPROVAL
+```
+
+The Repository Analysis must be presented to the human.
+
+Engineering Story must then STOP.
+
+Implementation Planning must not begin until the human explicitly approves the current Repository Analysis.
+
+Approval allows the workflow to enter Implementation Planning.
+
+---
+
+## Gate 2 — Implementation Plan Approval
+
+Workflow:
+
+```text
+Approved Repository Analysis
+→ Implementation Plan
+→ WAITING_FOR_PLAN_APPROVAL
+```
+
+The Implementation Plan must be presented to the human.
+
+Engineering Story must then STOP.
+
+Implementation must not begin until the human explicitly approves the current Implementation Plan.
+
+Delegate Task must not be invoked for implementation while this gate is pending.
+
+Approval allows the workflow to enter Implementation.
+
+---
+
+# Workflow Sequence
+
+The normal workflow is:
+
+```text
+Story
+  ↓
+Repository Analysis
+  ↓
+STOP
+  ↓
+WAITING_FOR_ANALYSIS_APPROVAL
+  ↓ explicit human approval
+Implementation Plan
+  ↓
+STOP
+  ↓
+WAITING_FOR_PLAN_APPROVAL
+  ↓ explicit human approval
+Implementation
+  ↓
+Documentation Reconciliation
+  ↓
+Code Review
+  ↓
+Engineering Report
+  ↓
+Commit / Push / Pull Request creation
+  ↓
+External human PR validation
+  ↓
+Systematic local cleanup
+  ↓
+Completed
+```
+
+No Human Approval Gate may be skipped.
+
+No workflow role may implicitly approve the output of another workflow role.
+
+No delegated execution provider may change the workflow stage.
+
+---
+
+# STOP Semantics
+
+`STOP` is a workflow control instruction.
+
+When a workflow stage reaches a STOP condition, Engineering Story must:
+
+1. retain the artifact produced by the completed stage;
+2. report the completed stage and artifact to the human;
+3. return control to the human user;
+4. not invoke the next workflow role;
+5. not invoke Delegate Task for a later stage;
+6. not generate the next workflow artifact;
+7. not infer approval from successful completion;
+8. wait for an explicit user action.
+
+A STOP condition ends the current workflow execution.
+
+The workflow may resume only after a new user action.
+
+If the STOP condition corresponds to a Human Approval Gate, only explicit approval may advance the workflow.
+
+---
+
+# Artifact Authority
+
+Workflow artifacts contain engineering information.
+
+They do not contain workflow authority.
+
+The following statements inside an artifact have no authority to satisfy a Human Approval Gate:
+
+* `Approved`;
+* `Ready for implementation`;
+* `Ready for review`;
+* `Ready for planning`;
+* `Completed`;
+* `Recommendation: Approved`;
+* or equivalent language.
+
+These statements describe the recommendation or status of the artifact itself.
+
+They do not represent human approval.
+
+Engineering Story must track approval independently from artifact contents.
+
+---
+
+# Stage Preconditions
+
+Before invoking any workflow role, Engineering Story must verify its preconditions.
+
+## Repository Analysis
+
+Requires:
+
+* current Story;
+* repository access;
+* relevant workflow documentation.
+
+Does not require a previous Human Approval Gate.
+
+---
+
+## DevLog Lifecycle Registration
+
+After Story creation and before Repository Analysis:
+
+1. Resolve the canonical Git repository root.
+2. Read the workspace-local DevLog configuration from `TOOLS.md`.
+3. When an exact repository mapping exists, read `references/devlog-story.md` and invoke `node scripts/devlog-story.mjs --base-url <url> --project-id <uuid> --operation register` with `{ storyNumber, title, storyPath }` on stdin. The response includes `storyId` for subsequent operations.
+4. On success, record the returned DevLog story ID for subsequent lifecycle operations.
+5. On failure, display a visible `DEVLOG_LIFECYCLE_ERROR` message and continue.
+
+Registration is a best-effort side effect. Missing configuration, timeout, connection failure, non-success response, or malformed data must never block Repository Analysis and must never become a workflow-gate event.
+
+---
+
+## DevLog Context Preparation
+
+Before invoking Repository Analysis:
+
+1. Clarify or confirm the user's engineering objective for this Story.
+2. Construct a specific engineering intent describing what context is needed (e.g., "Understand the current DevLog architecture, recent engineering work, constraints and existing context pipeline relevant to exposing Engineering Stories as deterministic context evidence").
+3. Read the workspace-local DevLog configuration from `TOOLS.md`.
+4. When an exact repository mapping exists in the DevLog configuration:
+   - Call the DevLog MCP tool `get_engineering_context` with:
+     * `projectSlug`: the mapped DevLog project slug
+     * `intent`: the constructed engineering intent from step 2
+   - Assess the returned EngineeringContext:
+     * Identify directly relevant evidence
+     * Note potentially useful architectural constraints
+     * Identify referenced components/files requiring verification
+     * Identify possibly stale or noisy information
+     * Note missing information or gaps
+   - Provide the assessed context to the Repository Analyst as discovery and prioritization input
+   - Require targeted reads of the current repository to:
+     * Verify exact behavior, implementation patterns, class or method details
+     * Confirm architectural verification
+     * Check for stale or conflicting evidence
+     * Validate current Git state, build configuration, and tests
+   - Treat the current repository as the authoritative source of truth
+5. When DevLog MCP is unavailable (network issues, service down) OR when the project is unknown OR when EngineeringContext is empty OR when context is excessively noisy OR when context is truncated OR when evidence appears stale:
+   - Display a visible `DEVLOG_CONTEXT_ERROR` message stating that Repository Analysis continues without DevLog
+   - Continue with the existing direct repository inspection workflow
+   - Do not block Repository Analysis on MCP failure
+
+DevLog is optional. MCP failure must never prevent an Engineering Story from being prepared. Missing configuration, timeout, connection failure, non-success response, malformed data, missing context, or unusable evidence must never block Repository Analysis and must never become a workflow-gate event.
+
+DevLog MCP provides engineering context and search-space reduction. The repository remains the source of truth for current implementation. Kiko performs reasoning and Engineering Story preparation. Human provides authority and approval.
+
+---
+
+## Vault Context Preparation
+
+Before invoking Repository Analysis:
+
+1. Determine whether the current Story appears likely to benefit from curated transverse knowledge already captured in the local Obsidian vault.
+2. Consult the vault selectively when the Story touches cross-project concepts, workflow patterns, quality standards, AI-governance rules, or knowledge-engineering principles already likely represented there.
+3. Use the existing repository-owned vault references and deterministic read-side tooling when vault consultation is performed.
+4. Treat vault notes as curated transverse guidance, not as authoritative project-state truth.
+5. Record in the Repository Analysis whether the vault was consulted and, when it was, which notes materially informed the analysis.
+6. Do not load the vault indiscriminately or treat the complete vault as mandatory default context.
+
+Source-of-truth precedence for Repository Analysis is:
+
+* current Story;
+* current repository evidence;
+* accepted repository ADRs and canonical repository documentation;
+* usable DevLog project context when available;
+* curated vault notes as transverse supporting context.
+
+Vault consultation is optional and selective. Missing vault access, missing notes, weak relevance, or an unchanged local vault state must never block Repository Analysis and must never become a workflow-gate event.
+
+## Implementation Planning
+
+Requires:
+
+* current Story;
+* completed Repository Analysis;
+* explicit human approval of the current Repository Analysis.
+
+If Repository Analysis approval is missing:
+
+STOP.
+
+Do not invoke the Implementation Planner.
+
+---
+
+## Implementation
+
+Requires:
+
+* current Story;
+* human-approved Repository Analysis;
+* completed Implementation Plan;
+* explicit human approval of the current Implementation Plan.
+
+If Implementation Plan approval is missing:
+
+STOP.
+
+Do not invoke Delegate Task.
+
+Do not modify implementation files.
+
+---
+
+## DevLog Lifecycle Start
+
+After Human Approval Gate 2 (Implementation Plan approved) and before Implementation begins:
+
+1. Capture `git rev-parse HEAD` as `baseCommit`.
+2. Invoke `node scripts/devlog-story.mjs --base-url <url> --project-id <uuid> --story-id <uuid> --operation start` with `{ baseCommit }` on stdin.
+3. On success, record the `baseCommit` for the subsequent complete operation.
+4. On failure, display a visible `DEVLOG_LIFECYCLE_ERROR` message and continue.
+
+Start is a best-effort side effect. Failure must never block Implementation and must never become a workflow-gate event.
+
+---
+
+## Documentation Reconciliation
+
+Requires:
+
+* completed implementation;
+* the current Story;
+* the human-approved Repository Analysis;
+* the human-approved Implementation Plan;
+* access to the repository's canonical documentation.
+
+Before Code Review:
+
+1. Determine whether the implementation changes documented behavior, API contracts, configuration,
+   installation or runtime instructions, architecture, operational procedures, or user-visible
+   capabilities.
+2. Inspect only the canonical documentation relevant to those changes.
+3. Update that documentation when necessary, preserving repository conventions and Story scope.
+4. Do not create speculative documentation, broad rewrites, changelogs, release notes, or unrelated
+   cleanup unless the Story explicitly requires them.
+5. Record in the Implementation Report which documentation was updated and why, or state
+   `Documentation update: Not required` with a concise evidence-based reason.
+6. Include documentation changes in the implementation diff and validation appropriate to their
+   format.
+7. Record a `Vault Outcome` section in the Implementation Report stating:
+   * whether the vault was consulted during Repository Analysis;
+   * whether the completed Story suggests:
+     * no vault action;
+     * a new candidate note;
+     * an enrich-existing candidate;
+     * a deferred vault action;
+   * the rationale and provenance for that outcome;
+   * the target curated note when enrichment is suggested.
+8. Keep all vault write-side outcomes proposal-only. Implementation must not silently curate or
+   overwrite curated vault notes.
+9. When the vault outcome is `new candidate note` or `enrich-existing candidate`, produce a
+   structured Story-local artifact named `vault-outcome.json` in the current Story directory.
+10. Treat `vault-outcome.json` as the authoritative proposal input for continuous feeding. The
+    Implementation Report remains the human-readable explanation.
+11. When `vault-outcome.json` is eligible for proposal generation, generate or update a
+    repository-owned proposal artifact under `transverse-memory/proposals/` before Code Review.
+12. The proposal artifact must remain outside the curated vault and must remain explicitly
+    proposal-only.
+
+If a required documentation update cannot be completed safely:
+
+STOP.
+
+Report the missing information or conflict and request human guidance.
+
+Documentation reconciliation does not add a Human Approval Gate and does not authorize scope
+expansion.
+
+## Code Review
+
+Requires:
+
+* current Story;
+* human-approved Repository Analysis;
+* human-approved Implementation Plan;
+* completed Implementation Report containing an explicit documentation outcome;
+* completed Documentation Reconciliation;
+* implementation diff.
+
+Code Review may follow successful implementation without an additional Human Approval Gate.
+
+The Code Reviewer may recommend approval.
+
+The Code Reviewer may never grant human approval.
+
+Code Review must also verify whether the Implementation Report's vault outcome is appropriate,
+evidence-based, and consistent with the workflow authority boundaries.
+
+Code Review must also verify that any generated `vault-outcome.json` and repository-owned proposal
+artifact are:
+
+* consistent with the Implementation Report;
+* deterministically derived from Story evidence;
+* free from duplicate proposal churn for the same Story outcome;
+* still proposal-only and outside the curated vault.
+
+---
+
+## Engineering Report
+
+Requires:
+
+* current Story;
+* human-approved Repository Analysis;
+* human-approved Implementation Plan;
+* completed Implementation Report;
+* completed Code Review Report;
+* repository state consistent with the reviewed implementation.
+
+The Engineering Report must summarize the final vault outcome for the Story:
+
+* whether curated vault context materially informed the work;
+* whether the Story produced no vault action, a new candidate suggestion, an enrich-existing
+  suggestion, or a deferred vault action;
+* whether the outcome remained proposal-only.
+
+When continuous feeding generated or updated a repository-owned proposal artifact, the Engineering
+Report must also summarize whether the action was:
+
+* created;
+* updated;
+* skipped as duplicate/no-op;
+* not applicable.
+
+---
+
+## Delivery Boundary, External PR Validation and DevLog Lifecycle Complete
+
+After producing the Engineering Report:
+
+1. Create the Git commit for the Story when the user has delegated that action to Engineering Story. Otherwise, tell the human the final artifact set is ready for commit.
+2. Push the branch and open the pull request when the user has delegated that action to Engineering Story and repository policy requires PR-based remote updates.
+3. Present the PR to the human for final validation.
+4. Wait for explicit human confirmation that the PR has been validated. This validation is outside the formal workflow state machine and is NOT a Human Approval Gate.
+5. After the human confirms PR validation, capture `git rev-parse HEAD` as `targetCommit`.
+6. Verify `targetCommit != baseCommit`. If they are equal, tell the human the commit was not detected and stop — the workflow resumes when the commit exists.
+7. Invoke `node scripts/devlog-story.mjs --base-url <url> --project-id <uuid> --story-id <uuid> --operation complete` with `{ targetCommit, baseCommit }` on stdin.
+8. On failure, display a visible `DEVLOG_LIFECYCLE_ERROR` message and continue.
+9. Perform a conservative local cleanup finalization:
+   * `git fetch --prune` to refresh remote state;
+   * switch to local `main` only when the working tree and branch transition are safe;
+   * fast-forward local `main` from `origin/main` when possible;
+   * delete only eligible merged local Story branches that are already obsolete;
+   * never rewrite history, never discard unrelated local changes, and never delete unmerged branches.
+10. If cleanup cannot be executed safely, stop and report the cleanup outcome explicitly instead of forcing Git state changes.
+11. Mark the Story as Completed only after cleanup finalization has succeeded or been explicitly recorded as safely skipped/blocked without destructive action.
+
+External PR validation is distinct from a Human Approval Gate. It is the final human repository-governance check before merge. DevLog complete is a best-effort side effect performed only after that validation is confirmed. Local cleanup is workflow-owned housekeeping, not delegated implementation work and not a Human Approval Gate.
+
+---
+
+# Implementation Delegation
+
+Implementation may be delegated through the Delegate Task skill.
+
+Engineering Story remains responsible for the engineering workflow.
+
+Engineering Story never delegates:
+
+* workflow ownership;
+* engineering governance;
+* approval gates;
+* architecture decisions;
+* workflow sequencing.
+
+Delegate Task performs execution only.
+
+Engineering Story never communicates directly with execution providers.
+
+Provider selection, runtime validation, execution, and result collection are delegated to Delegate Task.
+
+---
+
+# Delegation Policy
+
+Delegate Task may use any compatible execution provider.
+
+Current provider:
+
+* OpenCode
+
+Future providers may include:
+
+* Codex;
+* Claude Code;
+* Gemini CLI;
+* Developer OS Agents.
+
+Engineering Story must remain completely provider-independent.
+
+Provider behavior must never determine workflow governance.
+
+A provider that ignores workflow instructions is not authorized to bypass a Human Approval Gate.
+
+---
+
+# Delegation Preconditions
+
+Before invoking Delegate Task for implementation, Engineering Story must verify:
+
+* the Story exists;
+* Repository Analysis is complete;
+* Repository Analysis has explicit human approval;
+* Implementation Plan is complete;
+* the current Implementation Plan has explicit human approval;
+* repository validation has completed successfully;
+* no blocking workflow condition exists.
+
+If any precondition is not satisfied:
+
+STOP.
+
+Delegate Task must not be invoked.
+
+The presence of files named or described as approved artifacts is not sufficient evidence of approval.
+
+---
+
+# Delegation Context
+
+Before invoking Delegate Task, Engineering Story prepares a complete engineering context.
+
+The delegation context includes:
+
+* Story;
+* human-approved Repository Analysis;
+* human-approved Implementation Plan;
+* relevant ADRs;
+* repository conventions;
+* implementation constraints;
+* validation requirements;
+* expected deliverables;
+* expected Implementation Report location.
+
+The user must never manually prepare this context.
+
+Engineering Story is responsible for ensuring that every artifact described as approved in the delegation context has actually passed its corresponding Human Approval Gate.
+
+---
+
+# Delegation Request
+
+Engineering Story creates a Delegation Request.
+
+Delegate Task is responsible for:
+
+* selecting the provider;
+* validating execution prerequisites;
+* constructing the provider request;
+* executing the delegated task;
+* validating produced artifacts;
+* returning a structured Delegation Result.
+
+Engineering Story never performs provider-specific logic.
+
+Delegate Task performs execution only.
+
+Delegate Task does not own:
+
+* Human Approval Gates;
+* workflow sequencing;
+* Story state;
+* architecture approval;
+* final integration decisions.
+
+---
+
+# Delegation Result
+
+Engineering Story consumes the Delegation Result.
+
+If execution succeeds:
+
+* verify that the expected Implementation Report exists;
+* report generated artifacts;
+* report validation results;
+* continue to the Code Review stage when its preconditions are satisfied.
+
+Successful implementation does not constitute human approval.
+
+Successful implementation does not authorize finalization.
+
+If execution fails:
+
+* stop immediately;
+* preserve diagnostics;
+* report the failure;
+* request human guidance.
+
+---
+
+# Repository Validation
+
+Before implementation begins, Engineering Story verifies:
+
+* repository exists;
+* repository is a Git repository;
+* current branch is known;
+* Story directory exists;
+* working tree state is known.
+
+Repository validation is completed before Delegate Task is invoked.
+
+Repository validation does not replace Implementation Plan approval.
+
+---
+
+# IDE Review
+
+The selected execution provider must modify the repository currently opened by the engineer.
+
+Implementation must never occur inside an unknown or hidden repository unless explicitly requested.
+
+After successful execution, Engineering Story reports:
+
+* modified files;
+* created files;
+* generated artifacts;
+* executed validations;
+* executed tests;
+* remaining issues.
+
+The workflow must then perform Documentation Reconciliation. It may proceed to Code Review only
+after the Implementation Report records the documentation outcome and any required documentation
+changes are included in the reviewed diff.
+
+After Code Review, Engineering Story waits for human approval before finalization.
+
+---
+
+# Quality Validation
+
+Quality validation must be determined from the actual repository, affected modules, and active technical stack.
+
+When the `quality-validation` skill is available, Engineering Story should use it as the preferred mechanism for:
+
+* determining which quality checks are applicable;
+* executing or coordinating those checks;
+* producing a structured quality-validation result;
+* distinguishing applicable, non-applicable, executed, failed, blocked, and unavailable checks.
+
+When the `quality-validation` skill is unavailable, the execution provider must still report the same quality-validation outcome structure directly in the Implementation Report.
+
+Quality validation must remain separate from workflow authority.
+
+It may recommend readiness.
+
+It may never grant approval.
+
+When SonarQube is configured for an affected module, the quality-validation result must include a SonarQube analysis.
+
+When repository-defined frontend quality gates apply to the affected modules, the quality-validation result must include the applicable frontend checks such as lint, format verification, strict build or type checking, tests, and coverage gates used by that repository.
+
+When the Story changes ranking, allocation, prioritization, or another behavior where mechanical correctness and coverage can produce false confidence, the quality-validation result must include representative outcome validation.
+
+The execution provider must report:
+
+* affected modules or surfaces;
+* applicable checks;
+* executed checks;
+* passed checks;
+* failed checks;
+* blocked or unavailable checks with reasons;
+* non-applicable checks with reasons;
+* supporting evidence for material quality conclusions.
+
+When SonarQube applies, the execution provider must also report:
+
+* analyzed project key;
+* analysis command;
+* Quality Gate status;
+* new bugs;
+* new vulnerabilities;
+* new security hotspots;
+* new code smells;
+* new-code coverage;
+* duplicated lines on new code.
+
+A failed Quality Gate must never be reported as a successful implementation.
+
+SonarQube findings outside Story scope must not be corrected without explicit human approval.
+
+Missing required quality validation must never be represented as successful validation.
+
+A successful Quality Gate does not constitute human approval.
+
+Engineering Story never commits automatically.
+
+---
+
+# Human Interaction
+
+OpenClaw remains the interactive interface.
+
+Human interaction should remain minimal while preserving explicit governance.
+
+If the execution provider reports:
+
+* missing information;
+* architectural conflict;
+* contradictory requirements;
+* dependency problems;
+* unsafe Git state;
+* validation failures;
+
+Engineering Story stops immediately and requests human guidance.
+
+A request for human guidance is not a Human Approval Gate unless the workflow explicitly identifies it as one.
+
+After a Human Approval Gate is reached, Engineering Story must clearly state:
+
+* which stage completed;
+* which artifact requires approval;
+* what stage will become available after approval.
+
+Engineering Story must then return control to the human.
+
+---
+
+# User Interaction
+
+Normal interaction remains intentionally minimal.
+
+Supported examples:
+
+`Use engineering-story for Story <id>`
+
+Starts or resumes the workflow until the first STOP condition or Human Approval Gate.
+
+`Continue Story <id>`
+
+Continues only when no Human Approval Gate is pending.
+
+It never grants approval.
+
+`Approve and continue Story <id>`
+
+Approves only the Human Approval Gate currently pending for the Story and continues until the next STOP condition.
+
+`Reject Story <id>`
+
+Rejects the artifact associated with the current Human Approval Gate and stops the workflow for human guidance or revision.
+
+`Delegate this implementation.`
+
+May invoke Delegate Task only if all implementation preconditions and Human Approval Gates are already satisfied.
+
+`Delegate this documentation audit.`
+
+Delegates the requested audit without transferring workflow governance.
+
+Engineering Story automatically invokes Delegate Task when delegation is requested and delegation is permitted by the current workflow state.
+
+The user must never specify:
+
+* workflow stage;
+* artifact paths;
+* repository documents;
+* provider-specific commands;
+* provider authentication;
+* workflow sequencing;
+* provider implementation details.
+
+Engineering Story owns workflow orchestration from beginning to end.
+
+---
+
+# Governance Invariants
+
+The following invariants always apply.
+
+1. Only the human user can satisfy a Human Approval Gate.
+
+2. Approval is never inferred.
+
+3. Approval applies only to the current gate and current artifact version.
+
+4. Completing a stage never approves the next stage.
+
+5. A model, agent, workflow role, execution provider, artifact, test result, build result, or Quality Gate cannot grant human approval.
+
+6. Engineering Story must STOP whenever a required Human Approval Gate has not been satisfied.
+
+7. Implementation delegation is forbidden until the current Implementation Plan has explicit human approval.
+
+8. Finalization is forbidden until the current Code Review has explicit human approval.
+
+9. Documentation impact must be reconciled before Code Review; required documentation changes must
+be reviewed with the implementation.
+
+10. No approval cascades to future gates.
+
+11. Workflow governance remains provider-independent.
