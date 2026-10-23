@@ -79,6 +79,12 @@ engineering-skills/
 
 ## Skills
 
+### story-closure
+
+Finalizes an implemented Engineering Story through commit, dedicated branch,
+pull request, human validation, merge, and conservative obsolete-branch cleanup.
+It never infers authorization for destructive Git operations.
+
 ### engineering-story
 
 Coordinates the complete engineering lifecycle of a Story.

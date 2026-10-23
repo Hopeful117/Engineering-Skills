@@ -11,6 +11,7 @@ The project follows a simple versioned changelog.
 ## Added
 
 * Initial repository structure
+* Story Closure delivery skill
 * Engineering Story skill
 * Repository Analysis workflow
 * Implementation Plan workflow
